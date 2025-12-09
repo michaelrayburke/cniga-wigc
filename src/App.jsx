@@ -4,6 +4,7 @@ import LoginScreen from "./components/LoginScreen";
 import Layout from "./components/Layout";
 import Welcome from "./pages/Welcome";
 import Schedule from "./pages/Schedule";
+import Presenters from "./pages/Presenters";
 import "./index.css";
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
     <Layout activeTab={activeTab} onTabChange={setActiveTab}>
       {activeTab === "welcome" && <Welcome />}
       {activeTab === "schedule" && <Schedule />}
+      {activeTab === "presenters" && <Presenters />}
     </Layout>
   );
 }
