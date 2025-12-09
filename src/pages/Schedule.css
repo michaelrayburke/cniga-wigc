@@ -25,3 +25,69 @@
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.4);
 }
+
+.schedule-root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.schedule-filters-root {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.schedule-search-row {
+  display: flex;
+  gap: 8px;
+}
+
+.schedule-search-input {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.2);
+  color: #e5ecff;
+  font-size: 0.85rem;
+}
+
+.schedule-search-input::placeholder {
+  color: rgba(229, 236, 255, 0.6);
+}
+
+.schedule-track-select {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.2);
+  color: #e5ecff;
+  font-size: 0.8rem;
+}
+
+.schedule-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.schedule-star-btn {
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  color: rgba(255, 255, 255, 0.35);
+  transition: transform 0.1s ease, color 0.1s ease;
+}
+
+.schedule-star-btn:hover {
+  transform: scale(1.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.schedule-star-btn-on {
+  color: #ffd66b;
+}
