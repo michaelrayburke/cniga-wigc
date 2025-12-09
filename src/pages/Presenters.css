@@ -1,0 +1,144 @@
+/* src/pages/Presenters.css */
+.presenters-root {
+  display: flex;
+  gap: 16px;
+  min-height: 300px;
+}
+
+.presenters-list-panel {
+  width: 40%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.presenters-detail-panel {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.presenters-search input {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.2);
+  color: #e5ecff;
+  font-size: 0.85rem;
+}
+
+.presenters-list {
+  max-height: 420px;
+  overflow: auto;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.presenter-list-item {
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: transparent;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+  color: #e5ecff;
+}
+
+.presenter-list-item:last-child {
+  border-bottom: none;
+}
+
+.presenter-list-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.presenter-list-item-active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.presenter-avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.presenter-avatar-large {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  object-fit: cover;
+  margin-right: 12px;
+}
+
+.presenter-list-text {
+  flex: 1;
+}
+
+.presenter-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.presenter-sub {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.presenter-detail h2 {
+  margin: 0 0 4px;
+}
+
+.presenter-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.presenter-bio {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.presenter-bio p {
+  margin-bottom: 6px;
+}
+
+.presenter-sessions section {
+  margin-bottom: 10px;
+}
+
+.presenter-sessions h3 {
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.presenter-sessions ul {
+  list-style: disc;
+  padding-left: 18px;
+  margin: 0;
+}
+
+.presenter-sessions li {
+  font-size: 0.85rem;
+  margin-bottom: 3px;
+}
+
+@media (max-width: 768px) {
+  .presenters-root {
+    flex-direction: column;
+  }
+
+  .presenters-list-panel {
+    width: 100%;
+    max-width: 100%;
+  }
+}
