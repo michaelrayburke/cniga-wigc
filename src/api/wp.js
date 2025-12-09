@@ -7,6 +7,14 @@ import {
   EVENT_TYPES,
 } from "../config";
 
+// Decode things like AT&#038;T → AT&T
+function decodeHtmlEntities(str = "") {
+  if (!str) return "";
+  const txt = document.createElement("textarea");
+  txt.innerHTML = str;
+  return txt.value;
+}
+
 async function fetchJson(url) {
   const res = await fetch(url);
   if (!res.ok) {
@@ -43,7 +51,8 @@ async function fetchSingleSponsor({ id, type }) {
   return {
     id: data.id,
     type,
-    name: data.title?.rendered || "",
+    // 🔑 Decode HTML entities here so AT&#038;T → AT&T
+    name: decodeHtmlEntities(data.title?.rendered || ""),
     logoUrl: data.acf?.image?.url || null, // Tangible uses <Field image />
     website: data.acf?.website || null, // Tangible uses {Field website}
   };
@@ -122,11 +131,10 @@ async function fetchEventsByType(termSlug) {
   return items.map((item) => {
     const acf = item.acf || {};
 
-    // TODO: adjust these to match your actual ACF field keys
-    // Below are "best guess" names; change if needed.
     return {
       id: item.id,
-      title: item.title?.rendered || "",
+      // 🔑 Decode entities for event titles too, just in case
+      title: decodeHtmlEntities(item.title?.rendered || ""),
       // These fields are optional; they'll just be blank if not present
       date: acf.date || null,
       startTime: acf.start_time || acf.time || null,
@@ -143,13 +151,6 @@ export async function fetchScheduleData() {
     fetchEventsByType(EVENT_TYPES.sessions),
     fetchEventsByType(EVENT_TYPES.socials),
   ]);
-
-// Fix characters
-  function decodeHtmlEntities(str) {
-  const txt = document.createElement("textarea");
-  txt.innerHTML = str;
-  return txt.value;
-}
 
   return { sessions, socials };
 }
