@@ -144,5 +144,12 @@ export async function fetchScheduleData() {
     fetchEventsByType(EVENT_TYPES.socials),
   ]);
 
+// Fix characters
+  function decodeHtmlEntities(str) {
+  const txt = document.createElement("textarea");
+  txt.innerHTML = str;
+  return txt.value;
+}
+
   return { sessions, socials };
 }
