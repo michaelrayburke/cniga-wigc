@@ -314,18 +314,18 @@ function ScheduleFilters({
 
         {/* Track filter only really matters for seminars */}
         {trackOptions.length > 1 && (
-          <select
-            className="schedule-track-select"
-            value={trackFilter}
-            onChange={(e) => setTrackFilter(e.target.value)}
-          >
-            {trackOptions.map((t) => (
-              <option key={t} value={t}>
-                {t === "all" ? "All tracks" : t}
-              </option>
-            ))}
-          </select>
-        )}
+  <select
+    className="schedule-track-select"
+    value={trackFilter}
+    onChange={(e) => setTrackFilter(e.target.value)}
+  >
+    {trackOptions.map((t) => (
+      <option key={t} value={t}>
+        {t === "all" ? "All tracks" : t}
+      </option>
+    ))}
+  </select>
+)}
       </div>
     </div>
   );
