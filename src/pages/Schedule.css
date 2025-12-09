@@ -1,1 +1,27 @@
-/* Schedule page overrides can go here if desired. */
+.schedule-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.schedule-filter-btn {
+  flex: 1;
+  font-size: 0.8rem;
+  padding: 6px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: transparent;
+  color: #cbd5f5;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.schedule-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.schedule-filter-btn-active {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
