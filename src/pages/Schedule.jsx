@@ -313,7 +313,7 @@ function ScheduleFilters({
         />
 
         {/* Track filter only really matters for seminars */}
-        {trackOptions.length > 1 && (
+        {view === "sessions" && trackOptions.length > 1 && (
   <select
     className="schedule-track-select"
     value={trackFilter}
