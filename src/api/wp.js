@@ -132,37 +132,128 @@ export async function fetchSponsorGroups() {
  * EVENTS / SCHEDULE
  */
 
+// Helper: fetch presenters by IDs (used for speakers / moderator)
+async function fetchPresentersByIds(ids) {
+  if (!ids || !ids.length) return {};
+
+  const unique = Array.from(new Set(ids));
+  const url = `${WP_BASE_URL}/wp-json/wp/v2/presenter?per_page=100&include=${unique.join(
+    ","
+  )}`;
+  const items = await fetchJson(url);
+
+  const map = {};
+  for (const p of items) {
+    map[p.id] = {
+      id: p.id,
+      name: decodeHtmlEntities(p.title?.rendered || ""),
+      firstName: p.acf?.first_name || "",
+      lastName: p.acf?.last_name || "",
+      title: p.acf?.presentertitle || "",
+      org: p.acf?.presenterorg || "",
+      photo: p.acf?.presenterphoto || null,
+    };
+  }
+  return map;
+}
+
 // Fetch WIGC events filtered by event-type taxonomy (session / social)
 async function fetchEventsByType(termSlug) {
-  // Uses event-type taxonomy query var
+  // Ask WP to embed taxonomies so we can get room / track names
   const url = `${WP_BASE_URL}/wp-json/wp/v2/${EVENT_CPT_SLUG}?per_page=100&event-type=${encodeURIComponent(
     termSlug
-  )}`;
+  )}&_embed=1`;
   const items = await fetchJson(url);
 
   return items.map((item) => {
     const acf = item.acf || {};
 
+    // ── Taxonomy terms: room, track (if track is also a taxonomy later)
+    let roomName = null;
+    let trackName = null;
+
+    const termGroups = item._embedded?.["wp:term"] || [];
+    for (const group of termGroups) {
+      for (const term of group) {
+        if (!term || !term.taxonomy) continue;
+        if (term.taxonomy === "room" && !roomName) {
+          roomName = term.name;
+        }
+        if (term.taxonomy === "track" && !trackName) {
+          trackName = term.name;
+        }
+      }
+    }
+
+    // Fallback: ACF "track" text field if taxonomy not used
+    if (!trackName && acf.track) {
+      trackName = acf.track;
+    }
+
+    // Speakers / moderator are relationships to presenter CPT
+    const speakerIds = Array.isArray(acf.speakers) ? acf.speakers : [];
+    const moderatorId =
+      typeof acf.moderator === "number" ? acf.moderator : null;
+
+    // Description field can be either session-description or event_description
+    const descriptionHtml =
+      acf["session-description"] ||
+      acf.session_description ||
+      acf.event_description ||
+      acf["event-description"] ||
+      item.content?.rendered ||
+      "";
+
     return {
       id: item.id,
-      // Decode entities for event titles too, just in case
       title: decodeHtmlEntities(item.title?.rendered || ""),
-      // These fields are optional; they'll just be blank if not present
-      date: acf.date || null,
-      startTime: acf.start_time || acf.time || null,
-      endTime: acf.end_time || null,
-      location: acf.location || acf.room || null,
-      contentHtml: item.content?.rendered || "",
+      // Date / time from ACF
+      date: acf["event-date"] || null,
+      startTime: acf["event-time-start"] || null,
+      endTime: acf["event-time-end"] || null,
+      // Location-ish meta
+      room: roomName,
+      track: trackName,
+      // Raw IDs for later enrichment
+      speakerIds,
+      moderatorId,
+      // Full description HTML
+      contentHtml: descriptionHtml,
     };
   });
 }
 
-// Public: fetch both sessions and socials
+// Public: fetch both sessions and socials, and attach presenter objects
 export async function fetchScheduleData() {
-  const [sessions, socials] = await Promise.all([
+  const [sessionsRaw, socialsRaw] = await Promise.all([
     fetchEventsByType(EVENT_TYPES.sessions),
     fetchEventsByType(EVENT_TYPES.socials),
   ]);
+
+  // Collect all presenter IDs from both lists
+  const presenterIdSet = new Set();
+  for (const ev of [...sessionsRaw, ...socialsRaw]) {
+    (ev.speakerIds || []).forEach((id) => presenterIdSet.add(id));
+    if (ev.moderatorId) presenterIdSet.add(ev.moderatorId);
+  }
+
+  const presenters =
+    presenterIdSet.size > 0
+      ? await fetchPresentersByIds(Array.from(presenterIdSet))
+      : {};
+
+  function attachPeople(events) {
+    return events.map((ev) => ({
+      ...ev,
+      speakers: (ev.speakerIds || [])
+        .map((id) => presenters[id])
+        .filter(Boolean),
+      moderator: ev.moderatorId ? presenters[ev.moderatorId] || null : null,
+    }));
+  }
+
+  const sessions = attachPeople(sessionsRaw);
+  const socials = attachPeople(socialsRaw);
 
   return { sessions, socials };
 }
