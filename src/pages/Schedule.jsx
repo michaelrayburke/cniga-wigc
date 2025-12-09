@@ -7,15 +7,17 @@ export default function Schedule() {
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState([]);
   const [socials, setSocials] = useState([]);
+  const [allEvents, setAllEvents] = useState([]);
   const [error, setError] = useState("");
   const [view, setView] = useState("all"); // all | sessions | socials
 
   useEffect(() => {
     (async () => {
       try {
-        const { sessions, socials } = await fetchScheduleData();
+        const { sessions, socials, allEvents } = await fetchScheduleData();
         setSessions(sessions);
         setSocials(socials);
+        setAllEvents(allEvents);
       } catch (err) {
         console.error(err);
         setError("Unable to load schedule.");
@@ -32,8 +34,6 @@ export default function Schedule() {
   if (error) {
     return <p className="app-status-text app-status-error">{error}</p>;
   }
-
-  const allEvents = [...sessions, ...socials];
 
   let baseEvents;
   if (view === "sessions") {
