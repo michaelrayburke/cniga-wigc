@@ -168,7 +168,24 @@ async function fetchEventsByType(termSlug) {
   return items.map((item) => {
     const acf = item.acf || {};
 
-    // ── Taxonomy terms: room, track (if track is also a taxonomy later)
+    // Date + time from ACF
+    const dateLabel = acf["event-date"] || null;
+    const startStr = acf["event-time-start"] || null;
+
+    let sortKey = null;
+    let dayKey = null;
+    if (dateLabel) {
+      // "Thursday, February 27, 2025" → "February 27, 2025 11:10 am"
+      const cleaned = dateLabel.replace(/^[A-Za-z]+,\s*/, "");
+      const dateTimeStr = startStr ? `${cleaned} ${startStr}` : cleaned;
+      const d = new Date(dateTimeStr);
+      if (!isNaN(d.getTime())) {
+        sortKey = d.toISOString();        // full ordering key
+        dayKey = sortKey.slice(0, 10);    // YYYY-MM-DD for grouping
+      }
+    }
+
+    // ── Taxonomy terms: room, track (if track is a taxonomy later)
     let roomName = null;
     let trackName = null;
 
@@ -207,18 +224,16 @@ async function fetchEventsByType(termSlug) {
     return {
       id: item.id,
       title: decodeHtmlEntities(item.title?.rendered || ""),
-      // Date / time from ACF
-      date: acf["event-date"] || null,
+      date: dateLabel,
       startTime: acf["event-time-start"] || null,
       endTime: acf["event-time-end"] || null,
-      // Location-ish meta
       room: roomName,
       track: trackName,
-      // Raw IDs for later enrichment
       speakerIds,
       moderatorId,
-      // Full description HTML
       contentHtml: descriptionHtml,
+      sortKey,
+      dayKey,
     };
   });
 }
