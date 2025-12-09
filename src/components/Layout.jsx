@@ -33,6 +33,15 @@ export default function Layout({ activeTab, onTabChange, children }) {
         >
           Schedule
         </button>
+        <button
+    className={
+      "app-tab" + (activeTab === "presenters" ? " app-tab-active" : "")
+    }
+    onClick={() => onTabChange("presenters")}
+  >
+    Presenters
+  </button>
+        
       </nav>
 
       <main className="app-main">{children}</main>
