@@ -44,17 +44,29 @@ async function fetchSingleSponsor({ id, type }) {
     return null;
   }
 
-  const url = `${WP_BASE_URL}/wp-json/wp/v2/${type}/${id}`;
+  // Ask WP to embed featured media so we can grab the logo in one request
+  const url = `${WP_BASE_URL}/wp-json/wp/v2/${type}/${id}?_embed=1`;
   const data = await fetchJson(url);
 
-  // Adjust these if ACF field names differ
+  // Try to get the featured image URL from _embedded
+  const media = data._embedded?.["wp:featuredmedia"]?.[0];
+  const featuredLogo =
+    media?.source_url ||
+    media?.media_details?.sizes?.medium?.source_url ||
+    media?.media_details?.sizes?.thumbnail?.source_url ||
+    null;
+
+  // Fallback to ACF image if there is no featured image
+  const acfLogo = data.acf?.image?.url || null;
+
   return {
     id: data.id,
     type,
-    // 🔑 Decode HTML entities here so AT&#038;T → AT&T
+    // Decode HTML entities here so AT&#038;T → AT&T
     name: decodeHtmlEntities(data.title?.rendered || ""),
-    logoUrl: data.acf?.image?.url || null, // Tangible uses <Field image />
-    website: data.acf?.website || null, // Tangible uses {Field website}
+    logoUrl: featuredLogo || acfLogo,
+    // Prefer ACF website, then top-level website field
+    website: data.acf?.website || data.website || null,
   };
 }
 
@@ -122,7 +134,7 @@ export async function fetchSponsorGroups() {
 
 // Fetch WIGC events filtered by event-type taxonomy (session / social)
 async function fetchEventsByType(termSlug) {
-  // Standard pattern: ?{taxonomy}={term-slug}
+  // Uses event-type taxonomy query var
   const url = `${WP_BASE_URL}/wp-json/wp/v2/${EVENT_CPT_SLUG}?per_page=100&event-type=${encodeURIComponent(
     termSlug
   )}`;
@@ -133,7 +145,7 @@ async function fetchEventsByType(termSlug) {
 
     return {
       id: item.id,
-      // 🔑 Decode entities for event titles too, just in case
+      // Decode entities for event titles too, just in case
       title: decodeHtmlEntities(item.title?.rendered || ""),
       // These fields are optional; they'll just be blank if not present
       date: acf.date || null,
