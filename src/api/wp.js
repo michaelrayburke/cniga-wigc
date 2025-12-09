@@ -157,12 +157,9 @@ async function fetchPresentersByIds(ids) {
   return map;
 }
 
-// Fetch WIGC events filtered by event-type taxonomy (session / social)
-async function fetchEventsByType(termSlug) {
-  // Ask WP to embed taxonomies so we can get room / track names
-  const url = `${WP_BASE_URL}/wp-json/wp/v2/${EVENT_CPT_SLUG}?per_page=100&event-type=${encodeURIComponent(
-    termSlug
-  )}&_embed=1`;
+// Fetch ALL WIGC events once, with embedded taxonomies
+async function fetchAllEvents() {
+  const url = `${WP_BASE_URL}/wp-json/wp/v2/${EVENT_CPT_SLUG}?per_page=100&_embed=1`;
   const items = await fetchJson(url);
 
   return items.map((item) => {
@@ -180,19 +177,24 @@ async function fetchEventsByType(termSlug) {
       const dateTimeStr = startStr ? `${cleaned} ${startStr}` : cleaned;
       const d = new Date(dateTimeStr);
       if (!isNaN(d.getTime())) {
-        sortKey = d.toISOString();        // full ordering key
-        dayKey = sortKey.slice(0, 10);    // YYYY-MM-DD for grouping
+        sortKey = d.toISOString(); // full ordering key
+        dayKey = sortKey.slice(0, 10); // YYYY-MM-DD for grouping
       }
     }
 
-    // ── Taxonomy terms: room, track (if track is a taxonomy later)
+    // Taxonomy terms: event type, room, maybe track
     let roomName = null;
     let trackName = null;
+    const kinds = []; // e.g. ['session'] or ['social']
 
     const termGroups = item._embedded?.["wp:term"] || [];
     for (const group of termGroups) {
       for (const term of group) {
         if (!term || !term.taxonomy) continue;
+
+        if (term.taxonomy === "wigc-event-type") {
+          if (term.slug) kinds.push(term.slug); // 'session', 'social', etc.
+        }
         if (term.taxonomy === "room" && !roomName) {
           roomName = term.name;
         }
@@ -234,20 +236,18 @@ async function fetchEventsByType(termSlug) {
       contentHtml: descriptionHtml,
       sortKey,
       dayKey,
+      kinds, // e.g. ['session'], ['social'], or both
     };
   });
 }
 
-// Public: fetch both sessions and socials, and attach presenter objects
+// Public: fetch schedule and split into sessions / socials / all (deduped)
 export async function fetchScheduleData() {
-  const [sessionsRaw, socialsRaw] = await Promise.all([
-    fetchEventsByType(EVENT_TYPES.sessions),
-    fetchEventsByType(EVENT_TYPES.socials),
-  ]);
+  const rawEvents = await fetchAllEvents();
 
-  // Collect all presenter IDs from both lists
+  // Collect all presenter IDs from all events
   const presenterIdSet = new Set();
-  for (const ev of [...sessionsRaw, ...socialsRaw]) {
+  for (const ev of rawEvents) {
     (ev.speakerIds || []).forEach((id) => presenterIdSet.add(id));
     if (ev.moderatorId) presenterIdSet.add(ev.moderatorId);
   }
@@ -257,18 +257,25 @@ export async function fetchScheduleData() {
       ? await fetchPresentersByIds(Array.from(presenterIdSet))
       : {};
 
-  function attachPeople(events) {
-    return events.map((ev) => ({
-      ...ev,
-      speakers: (ev.speakerIds || [])
-        .map((id) => presenters[id])
-        .filter(Boolean),
-      moderator: ev.moderatorId ? presenters[ev.moderatorId] || null : null,
-    }));
-  }
+  const attachPeople = (ev) => ({
+    ...ev,
+    speakers: (ev.speakerIds || [])
+      .map((id) => presenters[id])
+      .filter(Boolean),
+    moderator: ev.moderatorId ? presenters[ev.moderatorId] || null : null,
+  });
 
-  const sessions = attachPeople(sessionsRaw);
-  const socials = attachPeople(socialsRaw);
+  // Enrich all events with speaker / moderator objects
+  const allEvents = rawEvents.map(attachPeople);
 
-  return { sessions, socials };
+  // Use taxonomy-kinds to classify
+  const sessions = allEvents.filter((ev) =>
+    ev.kinds?.includes(EVENT_TYPES.sessions)
+  );
+  const socials = allEvents.filter((ev) =>
+    ev.kinds?.includes(EVENT_TYPES.socials)
+  );
+
+  return { sessions, socials, allEvents };
 }
+
