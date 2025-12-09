@@ -279,3 +279,26 @@ export async function fetchScheduleData() {
   return { sessions, socials, allEvents };
 }
 
+// Public: fetch all presenters with full profile info
+export async function fetchPresentersList() {
+  const url = `${WP_BASE_URL}/wp-json/wp/v2/presenter?per_page=100`;
+  const items = await fetchJson(url);
+
+  return items.map((p) => {
+    const acf = p.acf || {};
+    return {
+      id: p.id,
+      name: decodeHtmlEntities(p.title?.rendered || ""),
+      firstName: acf.first_name || "",
+      lastName: acf.last_name || "",
+      title: acf.presentertitle || "",
+      org: acf.presenterorg || "",
+      bioHtml: acf.bio || "",
+      photo: acf.presenterphoto || null,
+      // keep sessions_speaker raw IDs in case we want them later
+      sessionsSpeaker: Array.isArray(acf.sessions_speaker)
+        ? acf.sessions_speaker
+        : [],
+    };
+  });
+}
