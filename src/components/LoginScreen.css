@@ -1,1 +1,48 @@
-/* Additional login-specific overrides can go here if needed. */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-label {
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.login-password-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.login-input-password {
+  flex: 1;
+}
+
+.login-toggle-password {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: transparent;
+  color: #e5ecff;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.login-toggle-password:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.login-error {
+  color: #ff9b9b;
+  font-size: 0.75rem;
+}
+
+.login-hint {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-top: 4px;
+}
