@@ -90,25 +90,47 @@ export default function Schedule() {
             {socials.map((e) => (
               <article key={e.id} className="schedule-card">
                 <div className="schedule-meta">
-                  {(e.date || e.startTime || e.location) && (
-                    <p>
-                      {e.date && <span>{e.date}</span>}
-                      {e.date && (e.startTime || e.endTime) && " • "}
-                      {e.startTime && (
-                        <span>
-                          {e.startTime}
-                          {e.endTime ? `–${e.endTime}` : ""}
-                        </span>
-                      )}
-                      {e.location && (
-                        <>
-                          {" • "}
-                          <span>{e.location}</span>
-                        </>
-                      )}
-                    </p>
-                  )}
-                </div>
+  {(e.date || e.startTime || e.endTime || e.room) && (
+    <p>
+      {e.date && <span>{e.date}</span>}
+      {e.date && (e.startTime || e.endTime) && " • "}
+      {e.startTime && (
+        <span>
+          {e.startTime}
+          {e.endTime ? `–${e.endTime}` : ""}
+        </span>
+      )}
+      {e.room && (
+        <>
+          {" • "}
+          <span>{e.room}</span>
+        </>
+      )}
+    </p>
+  )}
+
+  {(e.track || (e.speakers && e.speakers.length) || e.moderator) && (
+    <p>
+      {e.track && <span>Track: {e.track}</span>}
+      {e.track && (e.speakers?.length || e.moderator) && " • "}
+      {e.speakers && e.speakers.length > 0 && (
+        <span>
+          Speakers:{" "}
+          {e.speakers
+            .map((sp) => sp?.name || [sp.firstName, sp.lastName].filter(Boolean).join(" "))
+            .join(", ")}
+        </span>
+      )}
+      {e.moderator && (
+        <>
+          {" • "}
+          <span>Moderator: {e.moderator.name}</span>
+        </>
+      )}
+    </p>
+  )}
+</div>
+
                 <h3
                   className="schedule-title"
                   dangerouslySetInnerHTML={{ __html: e.title }}
