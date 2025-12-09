@@ -123,7 +123,7 @@ export async function fetchSponsorGroups() {
 // Fetch WIGC events filtered by event-type taxonomy (session / social)
 async function fetchEventsByType(termSlug) {
   // Standard pattern: ?{taxonomy}={term-slug}
-  const url = `${WP_BASE_URL}/wp-json/wp/v2/${EVENT_CPT_SLUG}?per_page=100&wigc-event-type=${encodeURIComponent(
+  const url = `${WP_BASE_URL}/wp-json/wp/v2/${EVENT_CPT_SLUG}?per_page=100&event-type=${encodeURIComponent(
     termSlug
   )}`;
   const items = await fetchJson(url);
