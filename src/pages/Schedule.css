@@ -2,116 +2,183 @@
 
 :root {
   --cniga-burnt-red: #f86c4f;
+  --cniga-slate-gray: #4b4b4b;
   --cniga-ghost-yellow: #ffeccd;
+  --cniga-cool-gray: #c8c8c8;
 }
 
-/* Root container */
 .schedule-root {
+  color: #111827;
+}
+
+/* Top controls: dark-gray bar with tabs + filters */
+.schedule-filters {
+  margin-bottom: 14px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
 }
 
-/* Filters row stays as-is but you can tune later */
-.schedule-filters {
+.schedule-view-tabs {
+  display: inline-flex;
+  background: var(--cniga-slate-gray);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Tab buttons: rectangular, active tab is full burnt-red block */
+.schedule-view-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #f9fafb;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.schedule-view-tab-active {
+  background: var(--cniga-burnt-red);
+  color: #ffffff;
+}
+
+/* Search + track row */
+.schedule-filter-row {
   display: flex;
   gap: 8px;
-  margin-bottom: 8px;
   flex-wrap: wrap;
 }
 
-.schedule-filter-btn {
-  flex: 1 1 auto;
+.schedule-search-input,
+.schedule-track-select {
   border-radius: 999px;
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.18);
   padding: 8px 12px;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  cursor: pointer;
-  background: rgba(0, 0, 0, 0.35);
-  color: #f9fafb;
-}
-
-.schedule-filter-btn-active {
-  background: #ffffff;
-  color: var(--cniga-burnt-red);
-}
-
-/* Day sections */
-.schedule-section {
-  margin-bottom: 12px;
-}
-
-/* Day header bar */
-.schedule-section > h2 {
-  margin: 0 0 6px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: var(--cniga-burnt-red) !important; /* burnt red bar */
-  color: #ffffff; /* white text */
   font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  background: rgba(255, 252, 245, 0.95);
+  color: #111827;
+  outline: none;
 }
 
-/* List of cards */
+.schedule-search-input {
+  flex: 1.4;
+}
+
+.schedule-track-select {
+  flex: 1;
+  min-width: 160px;
+}
+
+.schedule-search-input::placeholder {
+  color: #6b7280;
+}
+
+/* Day group */
+.schedule-section {
+  margin-bottom: 18px;
+}
+
+.schedule-day-heading {
+  background: var(--cniga-burnt-red);
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+/* List + cards */
 .schedule-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
-/* Event card – ghost yellow with light translucency */
 .schedule-card {
+  background: rgba(255, 236, 205, 0.94);
   border-radius: 18px;
-  padding: 10px 14px;
-  background: rgba(255, 236, 205, 0.92) !important; /* ghost yellow, slightly transparent */
-  color: #111111; /* dark text */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  padding: 12px 14px 12px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* Meta line (time, room, track, etc.) */
-.schedule-meta p {
-  margin: 0 0 4px;
-  font-size: 0.8rem;
+/* Title + star row */
+.schedule-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
-/* Title */
 .schedule-title {
-  margin: 4px 0;
   font-size: 0.95rem;
   font-weight: 700;
+  margin: 0;
 }
 
-/* Description text */
+/* Star button */
+.schedule-star-btn {
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  color: rgba(249, 115, 89, 0.4); /* subtle when off */
+  padding: 0;
+}
+
+.schedule-star-btn-active {
+  color: var(--cniga-burnt-red);
+}
+
+/* Meta text */
+.schedule-meta p {
+  margin: 2px 0 4px;
+  font-size: 0.8rem;
+  color: #374151;
+}
+
+.schedule-meta span {
+  white-space: nowrap;
+}
+
+/* Description body */
 .schedule-body {
   margin-top: 4px;
   font-size: 0.8rem;
   line-height: 1.4;
+  color: #111827;
 }
 
-button.schedule-star-btn {
-    background: transparent;
-    border: none;
-    color: #f86c4f;
-    float: right;
-    font-size: 20px;
+/* Status / error text (shared) */
+.app-status-text {
+  text-align: center;
+  font-size: 0.9rem;
+  padding: 18px 0;
+  color: #f9fafb;
 }
 
-/* Make links inside description readable */
-.schedule-body a {
-  color: #003f7f;
-  text-decoration: underline;
+.app-status-error {
+  color: #fecaca;
 }
 
-/* Slightly larger on tablet+ */
-@media (min-width: 768px) {
+/* Mobile tweaks */
+@media (max-width: 600px) {
   .schedule-card {
-    padding: 12px 18px;
+    padding: 11px 12px 11px;
   }
 
-  .schedule-title {
-    font-size: 1rem;
+  .schedule-view-tab {
+    font-size: 0.7rem;
+    padding: 7px 8px;
+  }
+
+  .schedule-day-heading {
+    font-size: 0.72rem;
   }
 }
