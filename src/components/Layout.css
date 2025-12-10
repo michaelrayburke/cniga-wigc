@@ -85,7 +85,7 @@
 
 .app-main-inner {
   max-width: 960px;
-  margin: 0 auto;
+  margin: 65px auto 0 !important;
   padding: 16px 16px 24px;
 }
 
