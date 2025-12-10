@@ -1,0 +1,44 @@
+/* src/pages/Profile.css */
+
+:root {
+  --cniga-burnt-red: #f86c4f;
+  --cniga-ghost-yellow: #ffeccd;
+}
+
+.profile-root {
+  display: flex;
+  justify-content: center;
+}
+
+.profile-card {
+  width: 100%;
+  max-width: 640px;
+  background: rgba(255, 236, 205, 0.94);
+  border-radius: 18px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  color: #111;
+}
+
+.profile-card h1 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: var(--cniga-burnt-red);
+  color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.profile-card p {
+  margin: 6px 0;
+  font-size: 0.85rem;
+}
+
+.profile-subtle {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
