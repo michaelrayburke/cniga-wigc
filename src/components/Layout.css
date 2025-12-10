@@ -58,32 +58,33 @@
   max-width: 480px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
+  align-items: center;
+  text-align: center;
 }
 
-/* Brand block above fields */
-.login-brand {
+/* Logo on top */
+.login-logo-wrap {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  justify-content: center;
 }
 
 .login-brand-mark {
-  width: 52px;
-  height: 52px;
-  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
 }
 
+/* Heading text directly under logo */
 .login-brand-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .login-brand-line-1 {
   font-family: "Tiempos Headline", "Georgia", "Times New Roman", serif;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   font-size: 0.9rem;
   text-transform: uppercase;
   color: var(--cniga-burnt-red); /* title in burnt red */
@@ -98,15 +99,16 @@
   color: var(--cniga-ghost-yellow); /* tagline in ghost yellow */
 }
 
-/* Form */
+/* PURE form – NO module background */
 .login-form {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 16px 18px 18px;
-  border-radius: 18px;
-  background: rgba(2, 6, 15, 0.72); /* subtle dark panel only around fields */
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+  /* no background, no radius, no shadow */
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .login-label {
@@ -118,6 +120,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  text-align: left;
 }
 
 .login-input {
@@ -207,7 +210,7 @@
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.8);
 }
 
-/* Mobile: lift the block a bit higher */
+/* Mobile: lift stack a bit */
 @media (max-width: 600px) {
   .login-content {
     align-items: flex-start;
@@ -215,8 +218,8 @@
   }
 
   .login-brand-mark {
-    width: 44px;
-    height: 44px;
+    width: 50px;
+    height: 50px;
   }
 
   .login-brand-line-1 {
