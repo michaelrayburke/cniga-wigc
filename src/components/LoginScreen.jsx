@@ -1,78 +1,117 @@
-// src/components/Layout.jsx
-import "./Layout.css";
-import wigcLogoWhite from "../assets/wigc-logo-white.svg";
-import bgImage from "../assets/bg1.jpg";
-import profileIcon from "../assets/profile-icon.svg";
+// src/components/LoginScreen.jsx
+import { useState } from "react";
+import "./LoginScreen.css";
 
-const TAB_LABELS = {
-  welcome: "Welcome",
-  schedule: "Schedule",
-  presenters: "Presenters",
-  profile: "My Profile",
-};
+import loginVideo from "../assets/wigc20242025timel.mp4";
+import cnigaLogo from "../assets/cniga-logo.svg";
 
-export default function Layout({ activeTab, onTabChange, children }) {
+export default function LoginScreen({ onLogin }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    // DEMO ONLY: any non-empty email + password logs in.
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter both email and password.");
+      return;
+    }
+
+    localStorage.setItem("cniga_isLoggedIn", "true");
+    onLogin();
+  }
+
   return (
-    <div className="app-shell">
-      {/* Background image layer */}
-      <div
-        className="app-bg-image"
-        style={{ backgroundImage: `url(${bgImage})` }}
-      />
+    <div className="login-root">
+      {/* Background video */}
+      <div className="login-video-layer">
+        <video
+          className="login-video"
+          src={loginVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+        {/* Slate overlay so form pops while video still visible */}
+        <div className="login-video-overlay" />
+      </div>
 
-      {/* Top app bar */}
-      <header className="app-header">
-        <div className="app-header-left">
-          <button
-            type="button"
-            className="app-header-logo"
-            onClick={() => onTabChange("welcome")}
-            aria-label="Go to welcome screen"
-          >
-            <img src={wigcLogoWhite} alt="WIGC logo" />
-            <span className="app-header-wordmark">WIGC</span>
-          </button>
-        </div>
+      {/* Foreground content */}
+      <div className="login-content">
+<div className="login-stack">
+  {/* LOGO on top */}
+  <div className="login-logo-wrap">
+    <img
+      src={cnigaLogo}
+      alt="CNIGA logo"
+      className="login-brand-mark"
+    />
+  </div>
 
-        <div className="app-header-title">
-          {TAB_LABELS[activeTab] || ""}
-        </div>
+  {/* Heading under logo */}
+  <div className="login-brand-text">
+    <span className="login-brand-line-1">
+      Western Indian Gaming Conference
+    </span>
+    <span className="login-brand-line-2">
+      Pechanga Resort Casino • 2026
+    </span>
+  </div>
 
-        <button
-          type="button"
-          className="app-header-profile"
-          onClick={() => onTabChange("profile")}
-          aria-label="View profile"
-        >
-          <span className="app-header-profile-icon">
-            <img src={profileIcon} alt="Profile" />
-          </span>
-        </button>
-      </header>
+  {/* Form directly under heading */}
+  <form className="login-form" onSubmit={handleSubmit}>
+            <label className="login-label">
+              Email
+              <input
+                type="email"
+                className="login-input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                autoComplete="email"
+                required
+              />
+            </label>
 
-      {/* Main content */}
-      <main className="app-main">
-        <div className="app-main-inner">{children}</div>
-      </main>
+            <label className="login-label">
+              Password
+              <div className="login-password-row">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="login-input login-input-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="login-toggle-password"
+                  onClick={() => setShowPassword((v) => !v)}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+            </label>
 
-      {/* Bottom navigation */}
-      <nav className="bottom-nav" aria-label="Primary navigation">
-        <div className="bottom-nav-inner">
-          {["welcome", "schedule", "presenters"].map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              className={
-                "app-nav-btn" +
-                (activeTab === tab ? " app-nav-btn-active" : "")
-              }
-              onClick={() => onTabChange(tab)}
-            >
-              {TAB_LABELS[tab]}
+            {error && <p className="login-error">{error}</p>}
+
+            <button type="submit" className="login-button">
+              Log in
             </button>
-          ))}
-        </div>
-      </nav>
+
+            <p className="login-hint">
+              Demo mode: any email &amp; password will sign you in.
+            </p>
+          </form>
+</div>
+
+      </div>
     </div>
   );
 }
