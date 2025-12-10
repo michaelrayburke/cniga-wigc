@@ -113,13 +113,13 @@
   font-weight: 600;
   cursor: pointer;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: 0;
   opacity: 0.85;
 }
 
 .app-nav-btn-active {
-  background: #ffffff;
-  color: var(--cniga-burnt-red);
+  color: #ffffff;
+  background: var(--cniga-burnt-red);
   opacity: 1;
 }
 
