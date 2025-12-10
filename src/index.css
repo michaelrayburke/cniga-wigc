@@ -1,14 +1,20 @@
 /* src/index.css */
 
-/* Global reset-ish */
+/* ========== Global reset-ish ========== */
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
+  padding: 0;
+}
+
+body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   background: radial-gradient(circle at top, #1b1f33, #050610);
@@ -20,82 +26,25 @@ a {
   text-decoration: none;
 }
 
-/* Layout */
+/* ========== App shell / layout ========== */
 
-.app-root {
+/* Layout.jsx wraps everything in .app-shell */
+.app-shell {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: radial-gradient(circle at top, #1b1f33, #050610);
+  width: 100%;
+  /* bg1.jpg is applied inline in Layout.jsx – these help it behave full-screen */
+  background-color: #000; /* fallback */
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
-.app-header {
-  padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.app-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.app-header-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  object-fit: cover;
-}
-
-.app-header-title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.app-header-subtitle {
-  margin: 0;
-  font-size: 0.75rem;
-  opacity: 0.75;
-}
-
-.app-tabs {
-  display: flex;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.7);
-}
-
-.app-tab {
-  flex: 1;
-  padding: 10px 0;
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-align: center;
-  background: transparent;
-  color: #cbd5f5;
-  border: none;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.app-tab:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.app-tab-active {
-  color: #ffffff;
-  border-bottom: 2px solid #ffffff;
-}
-
+/* Main scroll area – Layout.css handles padding, etc. */
 .app-main {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
+  background: transparent;
 }
 
-/* Status text */
-
+/* Status text for loading / error states */
 .app-status-text {
   text-align: center;
   margin-top: 24px;
@@ -107,266 +56,17 @@ a {
   color: #ffb4b4;
 }
 
-/* Login screen */
+/* ========== CNIGA header override ========== */
 
-.login-bg {
-  min-height: 100vh;
-  background-image: url("/images/background.jpg");
-  background-size: cover;
-  background-position: center;
-  position: relative;
-}
-
-.login-overlay {
-  min-height: 100vh;
-  background: radial-gradient(
-    circle at top,
-    rgba(0, 0, 0, 0.85),
-    rgba(0, 0, 0, 0.95)
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 420px;
-  background: rgba(14, 15, 30, 0.95);
-  border-radius: 18px;
-  padding: 20px 20px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.login-logo-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.login-logo {
-  width: 46px;
-  height: 46px;
-  border-radius: 999px;
-  object-fit: cover;
-}
-
-.login-title {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-}
-
-.login-subtitle {
-  margin: 2px 0 0;
-  font-size: 0.8rem;
-  opacity: 0.8;
-}
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 4px;
-}
-
-.login-label {
-  font-size: 0.85rem;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.login-input {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 8px 10px;
-  background: rgba(0, 0, 0, 0.6);
-  color: #f5f5f5;
-}
-
-.login-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.login-input:focus {
-  outline: none;
-  border-color: #ffffff;
-}
-
-.login-button {
-  margin-top: 6px;
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: none;
-  background: #ffffff;
-  color: #050610;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.1s ease, transform 0.1s ease;
-}
-
-.login-button:hover {
-  background: #e9e9e9;
-}
-
-.login-button:active {
-  transform: translateY(1px);
-}
-
-.login-footnote {
-  margin: 12px 0 0;
-  font-size: 0.75rem;
-  opacity: 0.7;
-  text-align: center;
-}
-
-/* Welcome / sponsors */
-
-.welcome-root {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.welcome-intro {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 14px;
-  padding: 12px 14px;
-}
-
-.welcome-intro h2 {
-  margin: 0 0 6px;
-  font-size: 1.05rem;
-}
-
-.welcome-intro p {
-  margin: 0;
-  font-size: 0.85rem;
-  opacity: 0.9;
-}
-
-.sponsor-group h3 {
-  margin: 0 0 8px;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  opacity: 0.85;
-}
-
-.sponsor-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 10px;
-}
-
-.sponsor-card {
-  background: rgba(254, 235, 205, 0.07);
-  border-radius: 12px;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 70px;
-  transition: background 0.1s ease, transform 0.1s ease;
-}
-
-.sponsor-card:hover {
-  background: rgba(255, 255, 255, 0.09);
-  transform: translateY(-1px);
-}
-
-.sponsor-logo {
-  max-width: 100%;
-  max-height: 50px;
-  object-fit: contain;
-}
-
-.sponsor-name {
-  font-size: 0.75rem;
-  text-align: center;
-}
-
-/* Schedule */
-
-.schedule-root {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.schedule-section h2 {
-  margin: 0 0 8px;
-  font-size: 1rem;
-}
-
-.schedule-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.schedule-meta {
-  font-size: 0.75rem;
-  opacity: 0.8;
-  margin-bottom: 4px;
-}
-
-.schedule-title {
-  margin: 0 0 4px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.schedule-body {
-  font-size: 0.8rem;
-  opacity: 0.9;
-}
-
-@media (min-width: 768px) {
-  .app-main {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-}
-
-
-
-
-/* === CNIGA WIGC overrides – keep everything above as-is === */
-
-/* 1. Fullscreen app background & no black bars */
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
-.app-shell {
-  min-height: 100vh;
-  width: 100%;
-  /* You already set the backgroundImage inline in Layout.jsx –
-     these properties make it behave full-screen */
-  background-color: #000; /* fallback */
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
-
-/* Make sure the content scrolls over the background image */
-.app-main {
-  background: transparent;
-}
-
-/* Header bar always in burnt red */
+/* Header bar always CNIGA burnt red.
+   (Layout.css defines the structure; this just locks the color.) */
 .app-header {
   background-color: #f86c4f !important; /* CNIGA burnt red */
 }
 
-/* 2. Sponsors grid: 2 per row on mobile, 3 per row on desktop,
-      bigger logos */
+/* ========== Sponsors grid (Welcome screen) ========== */
+
+/* 2 per row on mobile, 3 per row on larger screens, bigger logos */
 .sponsor-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -381,7 +81,7 @@ body {
   }
 }
 
-/* Bigger logos – this will override the smaller size from the build */
+/* Bigger logos – this overrides older small values */
 .sponsor-logo {
   max-width: 150px;
   max-height: 90px;
@@ -390,8 +90,9 @@ body {
   object-fit: contain;
 }
 
-/* 3. Schedule controls: search + track select + view buttons */
-/* Wrap search + track + buttons in .schedule-controls in JSX (see below) */
+/* ========== Schedule controls (search + track + view buttons) ========== */
+
+/* Wrap search + track + buttons in .schedule-controls in JSX */
 .schedule-controls {
   display: flex;
   flex-direction: column;
@@ -420,7 +121,7 @@ body {
   }
 }
 
-/* Search + track inputs share a common look */
+/* Shared look for search + track */
 .schedule-search-input,
 .schedule-track-select {
   flex: 1;
@@ -444,15 +145,11 @@ body {
   box-shadow: 0 0 0 2px rgba(248, 108, 79, 0.35);
 }
 
-/* You already have .schedule-filters + .schedule-filter-btn in your build;
-   this just keeps the burnt red active pill consistent. */
+/* Burnt-red active filter pill */
 .schedule-filter-btn-active {
   background: #f86c4f;
   color: #111827;
 }
 
-body {
-  outline: 10px solid hotpink !important;
-}
-
-
+/* (NOTE: schedule card background now lives in src/pages/Schedule.css,
+   so we DO NOT define .schedule-card here.) */
