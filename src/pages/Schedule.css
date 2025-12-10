@@ -66,7 +66,7 @@
 .schedule-card {
   border-radius: 18px;
   padding: 10px 14px;
-  background: rgba(255, 236, 205, 0.92); /* ghost yellow, slightly transparent */
+  background: rgba(255, 236, 205, 0.92) !important; /* ghost yellow, slightly transparent */
   color: #111111; /* dark text */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
