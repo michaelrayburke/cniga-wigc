@@ -14,65 +14,61 @@ const TAB_LABELS = {
 export default function Layout({ activeTab, onTabChange, children }) {
   return (
     <div className="app-shell">
-      {/* Top bar */}
+
+      <div
+        className="app-bg-image"
+        style={{ backgroundImage: `url(${bgImage})` }}
+      />
+
       <header className="app-header">
-        <button
-          className="app-header-logo"
-          onClick={() => onTabChange("welcome")}
-          aria-label="Go to welcome screen"
-        >
-          <img src={wigcLogoWhite} alt="WIGC logo" />
-        </button>
+        <div className="app-header-left">
+          <button
+            type="button"
+            className="app-header-logo"
+            onClick={() => onTabChange("welcome")}
+            aria-label="Go to welcome screen"
+          >
+            <img src={wigcLogoWhite} alt="WIGC logo" />
+            <span className="app-header-wordmark">WIGC</span>
+          </button>
+        </div>
 
         <div className="app-header-title">
-          {TAB_LABELS[activeTab] || "Western Indian Gaming Conference"}
+          {TAB_LABELS[activeTab] || ""}
         </div>
 
         <button
-          className="app-header-profile"
+          type="button"
+          className="app-header-profile-btn"
           onClick={() => onTabChange("profile")}
           aria-label="View profile"
         >
-          <span className="app-header-profile-icon"><img src={profileIcon} alt="Profile Icon" /></span>
+          <span className="app-header-profile-icon">
+            <img src={profileIcon} alt="Profile" />
+          </span>
         </button>
       </header>
 
-      {/* Scrollable main content */}
       <main className="app-main">
         <div className="app-main-inner">{children}</div>
       </main>
 
-      {/* Bottom nav */}
-      <nav className="app-bottom-nav" aria-label="Primary navigation">
-        <button
-          className={
-            "app-nav-btn" +
-            (activeTab === "welcome" ? " app-nav-btn-active" : "")
-          }
-          onClick={() => onTabChange("welcome")}
-        >
-          <span className="app-nav-label">Welcome</span>
-        </button>
-
-        <button
-          className={
-            "app-nav-btn" +
-            (activeTab === "schedule" ? " app-nav-btn-active" : "")
-          }
-          onClick={() => onTabChange("schedule")}
-        >
-          <span className="app-nav-label">Schedule</span>
-        </button>
-
-        <button
-          className={
-            "app-nav-btn" +
-            (activeTab === "presenters" ? " app-nav-btn-active" : "")
-          }
-          onClick={() => onTabChange("presenters")}
-        >
-          <span className="app-nav-label">Presenters</span>
-        </button>
+      <nav className="bottom-nav" aria-label="Primary navigation">
+        <div className="bottom-nav-inner">
+          {["welcome", "schedule", "presenters"].map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              className={
+                "bottom-nav-btn" +
+                (activeTab === tab ? " bottom-nav-btn-active" : "")
+              }
+              onClick={() => onTabChange(tab)}
+            >
+              {TAB_LABELS[tab]}
+            </button>
+          ))}
+        </div>
       </nav>
     </div>
   );
