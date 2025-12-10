@@ -91,6 +91,14 @@
   line-height: 1.4;
 }
 
+button.schedule-star-btn {
+    background: transparent;
+    border: none;
+    color: #eee;
+    float: right;
+    font-size: 20px;
+}
+
 /* Make links inside description readable */
 .schedule-body a {
   color: #003f7f;
