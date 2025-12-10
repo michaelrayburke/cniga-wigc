@@ -1,5 +1,7 @@
 // src/components/Layout.jsx
 import "./Layout.css";
+import wigcLogoWhite from "../assets/wigc-logo-white.svg";
+import bgImage from "../assets/bg1.jpg"; // just to ensure bundlers don't tree-shake it
 
 export default function Layout({ activeTab, onTabChange, children }) {
   return (
