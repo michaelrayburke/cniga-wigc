@@ -2,121 +2,145 @@
 
 :root {
   --cniga-burnt-red: #f86c4f;
-  --cniga-slate-gray: #4b4b4b;
   --cniga-ghost-yellow: #ffeccd;
-  --cniga-dim-gray: #828282;
+  --cniga-cool-gray: #c8c8c8;
+  --cniga-navy: #050815;
 }
 
-/* App shell with background image */
+/* Shell: header + main + bottom nav */
 .app-shell {
   min-height: 100vh;
+  background-color: #000;
+  color: #f9fafb;
+}
+
+/* Top bar */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
   display: flex;
-  flex-direction: column;
-  background: #111;
+  align-items: center;
+  padding: 0 14px;
+  background: var(--cniga-burnt-red);
+  color: #ffffff;
+  z-index: 20;
+}
+
+.app-header-logo {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.app-header-logo img {
+  height: 34px;
+  width: auto;
+}
+
+.app-header-title {
+  flex: 1;
+  text-align: center;
+  font-family: "Tiempos Headline", "Georgia", serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+}
+
+.app-header-profile {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.app-header-profile-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+}
+
+/* Main content */
+.app-main {
+  padding-top: 60px; /* header height */
+  padding-bottom: 64px; /* bottom nav height */
+  min-height: 100vh;
   background-image: url("../assets/bg1.jpg");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  color: #f9fafb;
 }
 
-/* Top orange bar */
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 32px;
+.app-main-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px 16px 24px;
+}
+
+/* Bottom nav */
+.app-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
   background: var(--cniga-burnt-red);
-  color: #fff8f1;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-}
-
-.app-header-left {
   display: flex;
+  justify-content: space-around;
   align-items: center;
-  gap: 12px;
+  z-index: 20;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.app-header-logo {
-  height: 32px;
-  width: auto;
-  flex-shrink: 0;
-}
-
-.app-header-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.app-header-title {
-  font-family: "Tiempos Headline", "Georgia", "Times New Roman", serif;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-}
-
-.app-header-subtitle {
-  font-family: "Mark Pro", system-ui, sans-serif;
-  font-weight: 400;
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.9;
-}
-
-/* Tabs */
-.app-tabs {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.app-tab {
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+.app-nav-btn {
+  border: none;
   background: transparent;
-  color: #fff8f1;
-  padding: 6px 14px;
+  color: #ffeccd;
   font-size: 0.75rem;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
   cursor: pointer;
-}
-
-.app-tab:hover {
-  background: rgba(0, 0, 0, 0.16);
-}
-
-.app-tab-active {
-  background: #fff8f1;
-  color: var(--cniga-burnt-red);
-}
-
-/* Main area */
-.app-main {
-  flex: 1;
-  padding: 24px;
-}
-
-/* Generic card style for inner pages (e.g., your beige boxes) */
-.app-card {
-  background: rgba(255, 236, 205, 0.95); /* ghost yellow */
-  border-radius: 18px;
-  padding: 18px 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-}
-
-/* You can use these for date headers & sponsor section titles */
-.app-section-heading {
-  display: inline-block;
-  padding: 6px 14px;
+  padding: 6px 10px;
   border-radius: 999px;
-  background: var(--cniga-burnt-red);
-  color: #fff8f1;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-weight: 700;
+  opacity: 0.85;
+}
+
+.app-nav-btn-active {
+  background: #ffffff;
+  color: var(--cniga-burnt-red);
+  opacity: 1;
+}
+
+.app-nav-btn:active {
+  transform: translateY(1px);
+}
+
+/* Small tweaks for larger screens */
+@media (min-width: 768px) {
+  .app-header {
+    height: 64px;
+    padding-inline: 24px;
+  }
+
+  .app-main {
+    padding-top: 64px;
+    padding-bottom: 72px;
+  }
+
+  .app-main-inner {
+    padding-inline: 24px;
+  }
 }
