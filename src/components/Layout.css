@@ -1,1 +1,122 @@
-/* Layout-specific overrides can go here if needed. */
+/* src/components/Layout.css */
+
+:root {
+  --cniga-burnt-red: #f86c4f;
+  --cniga-slate-gray: #4b4b4b;
+  --cniga-ghost-yellow: #ffeccd;
+  --cniga-dim-gray: #828282;
+}
+
+/* App shell with background image */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #111;
+  background-image: url("../assets/bg1.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #f9fafb;
+}
+
+/* Top orange bar */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 32px;
+  background: var(--cniga-burnt-red);
+  color: #fff8f1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.app-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-header-logo {
+  height: 32px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.app-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app-header-title {
+  font-family: "Tiempos Headline", "Georgia", "Times New Roman", serif;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.app-header-subtitle {
+  font-family: "Mark Pro", system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+/* Tabs */
+.app-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-tab {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: #fff8f1;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.app-tab:hover {
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.app-tab-active {
+  background: #fff8f1;
+  color: var(--cniga-burnt-red);
+}
+
+/* Main area */
+.app-main {
+  flex: 1;
+  padding: 24px;
+}
+
+/* Generic card style for inner pages (e.g., your beige boxes) */
+.app-card {
+  background: rgba(255, 236, 205, 0.95); /* ghost yellow */
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* You can use these for date headers & sponsor section titles */
+.app-section-heading {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--cniga-burnt-red);
+  color: #fff8f1;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
