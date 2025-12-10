@@ -19,9 +19,7 @@ export default function LoginScreen({ onLogin }) {
 
     const safePlay = () => {
       const p = video.play?.();
-      if (p && p.catch) {
-        p.catch(() => {});
-      }
+      if (p && p.catch) p.catch(() => {});
     };
 
     safePlay();
@@ -68,23 +66,26 @@ export default function LoginScreen({ onLogin }) {
       {/* Foreground content */}
       <div className="login-content">
         <div className="login-stack">
-          {/* Logo + headings ABOVE the form */}
-          <div className="login-brand">
+          {/* LOGO on top */}
+          <div className="login-logo-wrap">
             <img
               src={cnigaLogo}
               alt="CNIGA logo"
               className="login-brand-mark"
             />
-            <div className="login-brand-text">
-              <span className="login-brand-line-1">
-                Western Indian Gaming Conference
-              </span>
-              <span className="login-brand-line-2">
-                Pechanga Resort Casino • 2026
-              </span>
-            </div>
           </div>
 
+          {/* WIGC heading block under logo, above form */}
+          <div className="login-brand-text">
+            <span className="login-brand-line-1">
+              Western Indian Gaming Conference
+            </span>
+            <span className="login-brand-line-2">
+              Pechanga Resort Casino • 2026
+            </span>
+          </div>
+
+          {/* PURE form – no module background */}
           <form className="login-form" onSubmit={handleSubmit}>
             <label className="login-label">
               Email
