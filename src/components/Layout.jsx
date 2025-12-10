@@ -1,7 +1,7 @@
 // src/components/Layout.jsx
 import "./Layout.css";
 import wigcLogoWhite from "../assets/wigc-logo-white.svg";
-import bgImage from "../assets/bg1.jpg"; 
+import bgImage from "../assets/bg1.jpg";
 import profileIcon from "../assets/profile-icon.svg";
 
 const TAB_LABELS = {
@@ -14,12 +14,13 @@ const TAB_LABELS = {
 export default function Layout({ activeTab, onTabChange, children }) {
   return (
     <div className="app-shell">
-
+      {/* Background image layer */}
       <div
         className="app-bg-image"
         style={{ backgroundImage: `url(${bgImage})` }}
       />
 
+      {/* Top app bar */}
       <header className="app-header">
         <div className="app-header-left">
           <button
@@ -39,7 +40,7 @@ export default function Layout({ activeTab, onTabChange, children }) {
 
         <button
           type="button"
-          className="app-header-profile-btn"
+          className="app-header-profile"
           onClick={() => onTabChange("profile")}
           aria-label="View profile"
         >
@@ -49,10 +50,12 @@ export default function Layout({ activeTab, onTabChange, children }) {
         </button>
       </header>
 
+      {/* Main content */}
       <main className="app-main">
         <div className="app-main-inner">{children}</div>
       </main>
 
+      {/* Bottom navigation */}
       <nav className="bottom-nav" aria-label="Primary navigation">
         <div className="bottom-nav-inner">
           {["welcome", "schedule", "presenters"].map((tab) => (
@@ -60,8 +63,8 @@ export default function Layout({ activeTab, onTabChange, children }) {
               key={tab}
               type="button"
               className={
-                "bottom-nav-btn" +
-                (activeTab === tab ? " bottom-nav-btn-active" : "")
+                "app-nav-btn" +
+                (activeTab === tab ? " app-nav-btn-active" : "")
               }
               onClick={() => onTabChange(tab)}
             >
