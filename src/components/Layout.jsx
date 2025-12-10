@@ -30,7 +30,6 @@ export default function Layout({ activeTab, onTabChange, children }) {
             aria-label="Go to welcome screen"
           >
             <img src={wigcLogoWhite} alt="WIGC logo" />
-            <span className="app-header-wordmark">WIGC</span>
           </button>
         </div>
 
