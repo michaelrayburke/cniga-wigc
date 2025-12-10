@@ -457,3 +457,8 @@ body {
   color: #111827;
 }
 
+body {
+  outline: 10px solid hotpink !important;
+}
+
+
