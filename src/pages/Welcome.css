@@ -6,86 +6,64 @@
   --cniga-slate-gray: #4b4b4b;
 }
 
-/* Root */
+/* Root container */
 .welcome-root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #111827; /* dark text inside our ghost-yellow panels */
+}
+
+/* "Welcome" chip heading above the intro box */
+.welcome-heading {
+  display: inline-block;
+  padding: 6px 14px;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  background: var(--cniga-burnt-red);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Intro box under the heading */
+.welcome-intro {
+  background: rgba(255, 236, 205, 0.9); /* ghost yellow */
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.welcome-intro h2 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: #111827;
 }
 
-/* Hero image is already set in Layout via bg1.jpg; this just gives spacing */
-.welcome-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-/* Intro / heading block */
-.welcome-intro {
-  margin-bottom: 8px;
-}
-
-.welcome-intro-title {
-  font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #ffffff;
-  margin-bottom: 6px;
-}
-
-.welcome-intro-text {
+.welcome-intro p {
+  margin: 0;
   font-size: 0.9rem;
-  max-width: 540px;
-  color: #fdf5ea;
+  line-height: 1.4;
 }
 
-/* Sponsors */
-.welcome-sponsor-section {
-  margin-top: 8px;
-}
+/* ===== Sponsors ===== */
 
-.welcome-sponsor-heading {
-  background: var(--cniga-burnt-red);
-  color: #ffffff;
-  border-radius: 999px;
-  display: inline-block;
-  padding: 7px 16px;
-  font-size: 0.78rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-/* Ghost-yellow panel behind sponsors */
-.welcome-sponsor-panel {
-  background: rgba(255, 236, 205, 0.94);
-  border-radius: 18px;
-  padding: 12px 14px 10px;
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
-}
-
-/* 3 across on mobile, auto-fit on larger screens */
-.welcome-sponsor-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-@media (min-width: 768px) {
-  .welcome-sponsor-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  }
-}
-
-/* Wrap each sponsor level in a soft ghost-yellow panel */
+/* One panel per sponsor level (Title, Gold, etc.) */
 .sponsor-section {
-  margin-top: 18px;
+  margin-top: 10px;
   margin-bottom: 18px;
   padding: 12px 14px 16px;
   border-radius: 14px;
   background: rgba(255, 236, 205, 0.9); /* ghost yellow */
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
 }
 
-/* Label like "Gold Sponsors", "Title Sponsors", etc. */
+/* Label like "Gold Sponsors" chip */
 .sponsor-section-title {
   margin: 0 0 10px;
   padding: 6px 12px;
@@ -99,40 +77,29 @@
   text-transform: uppercase;
 }
 
-/* Let the card just be a layout wrapper with transparent bg */
+/* Cards themselves are just click/tap targets – no box bg */
 .sponsor-card {
   background: transparent;
   box-shadow: none;
-}
-
-
-.welcome-sponsor-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 14px;
-  padding: 8px 6px;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
 }
 
-.welcome-sponsor-card a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.sponsor-card:hover {
+  transform: translateY(-1px);
 }
 
-.welcome-sponsor-logo {
-  width: 80%;
-  max-width: 120px;
-  height: auto;
-  object-fit: contain;
+/* The logo sizing/layout is controlled primarily by src/index.css (.sponsor-logo),
+   so we only tweak behavior here if needed. */
+.sponsor-logo {
+  display: block;
 }
 
-/* Slightly bigger logos on larger screens */
-@media (min-width: 768px) {
-  .welcome-sponsor-logo {
-    width: 90%;
-    max-width: 140px;
-  }
+/* Fallback name text if there is no logo */
+.sponsor-name {
+  font-size: 0.8rem;
+  text-align: center;
+  color: #111827;
 }
