@@ -118,7 +118,7 @@
 }
 
 .app-nav-btn-active {
-  color: #ffffff;
+  color: #fff;
   background: var(--cniga-burnt-red);
   opacity: 1;
 }
@@ -272,7 +272,7 @@
 
 .app-nav-btn-active {
   background: var(--cniga-burnt-red);
-  color: #050610;
+  color: #fff;
   opacity: 1;
 }
 
