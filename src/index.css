@@ -148,7 +148,7 @@ a {
 /* Burnt-red active filter pill */
 .schedule-filter-btn-active {
   background: #f86c4f;
-  color: #111827;
+  color: #fff;
 }
 
 /* (NOTE: schedule card background now lives in src/pages/Schedule.css,
