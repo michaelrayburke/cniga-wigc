@@ -5,6 +5,7 @@ import Layout from "./components/Layout";
 import Welcome from "./pages/Welcome";
 import Schedule from "./pages/Schedule";
 import Presenters from "./pages/Presenters";
+import Profile from "./pages/Profile"; 
 import "./index.css";
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
       {activeTab === "welcome" && <Welcome />}
       {activeTab === "schedule" && <Schedule />}
       {activeTab === "presenters" && <Presenters />}
+      {activeTab === "profile" && <Profile />}
     </Layout>
   );
 }
