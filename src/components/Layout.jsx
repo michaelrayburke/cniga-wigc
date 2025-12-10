@@ -2,6 +2,7 @@
 import "./Layout.css";
 import wigcLogoWhite from "../assets/wigc-logo-white.svg";
 import bgImage from "../assets/bg1.jpg"; 
+import profileIcon from "../assets/profile-icon.svg";
 
 const TAB_LABELS = {
   welcome: "Welcome",
@@ -32,7 +33,7 @@ export default function Layout({ activeTab, onTabChange, children }) {
           onClick={() => onTabChange("profile")}
           aria-label="View profile"
         >
-          <span className="app-header-profile-icon">👤</span>
+          <span className="app-header-profile-icon"><img src={profileIcon} alt="Profile Icon" /></span>
         </button>
       </header>
 
