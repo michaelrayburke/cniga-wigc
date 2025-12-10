@@ -2,6 +2,9 @@
 import { useState } from "react";
 import "./LoginScreen.css";
 
+import loginVideo from "../assets/wigc20242025timel.mp4";
+import cnigaLogo from "../assets/cniga-logo.svg";
+
 export default function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,71 +14,98 @@ export default function LoginScreen({ onLogin }) {
   function handleSubmit(e) {
     e.preventDefault();
 
-    // For now, accept ANY non-empty email/password.
+    // DEMO ONLY: any non-empty email + password logs in.
     if (!email.trim() || !password.trim()) {
       setError("Please enter both email and password.");
       return;
     }
 
     localStorage.setItem("cniga_isLoggedIn", "true");
-    // later we can also store token / user info here
     onLogin();
   }
 
   return (
     <div className="login-root">
-      <div className="login-card">
-        <h1 className="login-title">Western Indian Gaming Conference</h1>
-        <p className="login-subtitle">
-          CNIGA • Pechanga Resort Casino • 2026
-        </p>
+      {/* Background video */}
+      <div className="login-video-layer">
+        <video
+          className="login-video"
+          src={loginVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+        {/* Slate overlay so form pops while video still visible */}
+        <div className="login-video-overlay" />
+      </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <label className="login-label">
-            Email
-            <input
-              type="email"
-              className="login-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              autoComplete="email"
-              required
+      {/* Foreground content */}
+      <div className="login-content">
+        <div className="login-card">
+          <div className="login-brand">
+            <img
+              src={cnigaLogo}
+              alt="CNIGA logo"
+              className="login-brand-mark"
             />
-          </label>
+            <div className="login-brand-text">
+              <span className="login-brand-line-1">
+                Western Indian Gaming Conference
+              </span>
+              <span className="login-brand-line-2">
+                CNIGA • Pechanga Resort Casino • 2026
+              </span>
+            </div>
+          </div>
 
-          <label className="login-label">
-            Password
-            <div className="login-password-row">
+          <form className="login-form" onSubmit={handleSubmit}>
+            <label className="login-label">
+              Email
               <input
-                type={showPassword ? "text" : "password"}
-                className="login-input login-input-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                autoComplete="current-password"
+                type="email"
+                className="login-input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                autoComplete="email"
                 required
               />
-              <button
-                type="button"
-                className="login-toggle-password"
-                onClick={() => setShowPassword((v) => !v)}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-          </label>
+            </label>
 
-          {error && <p className="login-error">{error}</p>}
+            <label className="login-label">
+              Password
+              <div className="login-password-row">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="login-input login-input-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="login-toggle-password"
+                  onClick={() => setShowPassword((v) => !v)}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+            </label>
 
-          <button type="submit" className="login-button">
-            Log in
-          </button>
+            {error && <p className="login-error">{error}</p>}
 
-          <p className="login-hint">
-            Any email & password will work for this demo.
-          </p>
-        </form>
+            <button type="submit" className="login-button">
+              Log in
+            </button>
+
+            <p className="login-hint">
+              Demo mode: any email & password will sign you in.
+            </p>
+          </form>
+        </div>
       </div>
     </div>
   );
