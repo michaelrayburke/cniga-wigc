@@ -194,7 +194,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  background: var(--cniga-burnt-red); /* brand red */
+  background: var(--cniga-burnt-red) !important; /* brand red */
   color: #fff8f1;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.75);
   transition: background 0.15s ease, color 0.15s ease,
@@ -202,7 +202,7 @@
 }
 
 .login-button:hover {
-  background: var(--cniga-cool-gray); /* cool gray hover */
+  background: var(--cniga-cool-gray) !important; /* cool gray hover */
   color: #111827;
 }
 
