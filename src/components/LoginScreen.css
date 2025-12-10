@@ -1,13 +1,12 @@
 /* src/components/LoginScreen.css */
 
 :root {
-  --cniga-burnt-red: #f86c4f;   /* primary accent */
-  --cniga-slate-gray: #4b4b4b;  /* deep gray background */
-  --cniga-ghost-yellow: #ffeccd; /* warm beige */
+  --cniga-burnt-red: #f86c4f;
+  --cniga-slate-gray: #4b4b4b;
+  --cniga-ghost-yellow: #ffeccd;
   --cniga-cool-gray: #c8c8c8;
 }
 
-/* Fullscreen wrapper */
 .login-root {
   position: relative;
   min-height: 100vh;
@@ -18,7 +17,7 @@
   color: #ffffff;
 }
 
-/* Video background layer */
+/* Video */
 .login-video-layer {
   position: absolute;
   inset: 0;
@@ -32,7 +31,6 @@
   object-fit: cover;
 }
 
-/* Slate overlay to keep text legible */
 .login-video-overlay {
   position: absolute;
   inset: 0;
@@ -41,7 +39,7 @@
       rgba(0, 0, 0, 0.2),
       transparent 40%
     ),
-    rgba(34, 34, 34, 0.72);
+    rgba(6, 10, 18, 0.82);
 }
 
 /* Foreground content */
@@ -55,61 +53,65 @@
   padding: 24px;
 }
 
-/* Main card */
-.login-card {
+/* Center stack */
+.login-stack {
   width: 100%;
   max-width: 480px;
-  background: rgba(255, 236, 205, 0.96); /* ghost yellow, slightly transparent */
-  border-radius: 18px;
-  padding: 28px 28px 24px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-  color: var(--cniga-slate-gray);
-  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+  text-align: center;
 }
 
-/* Brand header */
-.login-brand {
+/* Logo: BIG, centered.
+   ~75% of mobile width, nicely clamped on desktop. */
+.login-logo-wrap {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 20px;
+  justify-content: center;
+  width: 100%;
 }
 
 .login-brand-mark {
-  width: 52px;
-  height: 52px;
-  flex-shrink: 0;
+  width: clamp(180px, 75vw, 260px);
+  height: auto;
 }
 
+/* Heading text */
 .login-brand-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .login-brand-line-1 {
   font-family: "Tiempos Headline", "Georgia", "Times New Roman", serif;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  font-size: 0.95rem;
   text-transform: uppercase;
-  color: var(--cniga-slate-gray);
+  color: var(--cniga-burnt-red); /* title in burnt red */
 }
 
 .login-brand-line-2 {
   font-family: "Mark Pro", system-ui, sans-serif;
   font-weight: 400;
-  font-size: 0.8rem;
-  letter-spacing: 0.05em;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #7a7a7a;
+  color: var(--cniga-cool-gray); /* casino name • 2026 in cool gray */
 }
 
-/* Form */
+/* PURE form (no module background at all) */
 .login-form {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
 }
 
 .login-label {
@@ -117,25 +119,30 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 600;
-  color: var(--cniga-slate-gray);
+  color: #f5f5f5;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  text-align: left;
 }
 
 .login-input {
   border-radius: 999px;
-  border: 1px solid rgba(75, 75, 75, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 10px 14px;
   font-size: 0.9rem;
   outline: none;
-  background: rgba(255, 255, 255, 0.9);
-  color: #222;
+  background: rgba(10, 14, 26, 0.9);
+  color: #f9fafb;
+}
+
+.login-input::placeholder {
+  color: rgba(248, 250, 252, 0.5);
 }
 
 .login-input:focus {
   border-color: var(--cniga-burnt-red);
-  box-shadow: 0 0 0 2px rgba(248, 108, 79, 0.2);
+  box-shadow: 0 0 0 2px rgba(248, 108, 79, 0.3);
 }
 
 .login-password-row {
@@ -150,33 +157,33 @@
 
 .login-toggle-password {
   border-radius: 999px;
-  border: 1px solid rgba(75, 75, 75, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 7px 12px;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   background: transparent;
   cursor: pointer;
-  color: var(--cniga-slate-gray);
+  color: #f9fafb;
 }
 
 .login-toggle-password:hover {
-  background: rgba(75, 75, 75, 0.06);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* Error + hint */
 .login-error {
-  color: #b02020;
+  color: #ffb3b3;
   font-size: 0.75rem;
 }
 
 .login-hint {
   font-size: 0.75rem;
-  color: #6a6a6a;
+  color: rgba(241, 245, 249, 0.75);
   margin-top: 4px;
 }
 
-/* CTA button */
+/* Button: burnt red, cool gray on hover/pressed */
 .login-button {
   margin-top: 10px;
   border: none;
@@ -187,41 +194,37 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  background: var(--cniga-burnt-red);
+  background: var(--cniga-burnt-red); /* brand red */
   color: #fff8f1;
-  box-shadow: 0 12px 24px rgba(248, 108, 79, 0.35);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.75);
+  transition: background 0.15s ease, color 0.15s ease,
+    transform 0.08s ease, box-shadow 0.08s ease;
 }
 
 .login-button:hover {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
+  background: var(--cniga-cool-gray); /* cool gray hover */
+  color: #111827;
 }
 
 .login-button:active {
-  transform: translateY(0);
-  box-shadow: 0 6px 14px rgba(248, 108, 79, 0.4);
+  background: var(--cniga-cool-gray);
+  color: #111827;
+  transform: translateY(1px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.8);
 }
 
-/* Mobile tweaks */
+/* Mobile: sit higher on the screen */
 @media (max-width: 600px) {
-  .login-card {
-    padding: 22px 18px 18px;
-  }
-
-  .login-brand {
+  .login-content {
     align-items: flex-start;
-  }
-
-  .login-brand-mark {
-    width: 44px;
-    height: 44px;
+    padding-top: 14vh;
   }
 
   .login-brand-line-1 {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
 
   .login-brand-line-2 {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
   }
 }
