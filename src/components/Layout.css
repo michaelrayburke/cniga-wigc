@@ -10,7 +10,6 @@
 /* Shell: header + main + bottom nav */
 .app-shell {
   min-height: 100vh;
-  width: 100%;
   background-color: #000;
   color: #f9fafb;
 }
