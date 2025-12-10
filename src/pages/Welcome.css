@@ -76,6 +76,36 @@
   }
 }
 
+/* Wrap each sponsor level in a soft ghost-yellow panel */
+.sponsor-section {
+  margin-top: 18px;
+  margin-bottom: 18px;
+  padding: 12px 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 236, 205, 0.9); /* ghost yellow */
+}
+
+/* Label like "Gold Sponsors", "Title Sponsors", etc. */
+.sponsor-section-title {
+  margin: 0 0 10px;
+  padding: 6px 12px;
+  display: inline-block;
+  border-radius: 999px;
+  background: var(--cniga-burnt-red);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Let the card just be a layout wrapper with transparent bg */
+.sponsor-card {
+  background: transparent;
+  box-shadow: none;
+}
+
+
 .welcome-sponsor-card {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 14px;
