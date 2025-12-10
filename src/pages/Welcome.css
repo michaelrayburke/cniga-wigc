@@ -1,1 +1,11 @@
-/* Welcome / sponsors page overrides can go here if desired. */
+.welcome-sponsor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .welcome-sponsor-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
