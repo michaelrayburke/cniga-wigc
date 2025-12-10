@@ -143,3 +143,152 @@
     padding-inline: 24px;
   }
 }
+
+
+/* === App background & layout overrides (ensure full-screen bg image, no side bars) === */
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background-color: #000;
+}
+
+/* Full-screen background image behind all content */
+.app-bg-image {
+  position: fixed;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+}
+
+/* Keep header, main content, and bottom nav above background */
+.app-header,
+.app-main,
+.bottom-nav {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header bar: burnt red strip with logo + title + profile */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 16px;
+  background: var(--cniga-burnt-red);
+  color: #ffeccd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.app-header-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.app-header-logo img {
+  height: 32px;
+  width: auto;
+}
+
+.app-header-wordmark {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.app-header-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Profile icon button */
+.app-header-profile {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.app-header-profile-icon img {
+  height: 26px;
+  width: 26px;
+}
+
+/* Main content area */
+.app-main {
+  padding-top: 64px;
+  padding-bottom: 72px;
+}
+
+.app-main-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* Bottom navigation strip */
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 60px;
+  background: #111827;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.bottom-nav-inner {
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Nav buttons wired to existing classes */
+.app-nav-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #ffeccd;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  opacity: 0.85;
+}
+
+.app-nav-btn-active {
+  background: var(--cniga-burnt-red);
+  color: #050610;
+  opacity: 1;
+}
+
+/* Slightly taller header/nav on wider screens */
+@media (min-width: 768px) {
+  .app-header {
+    height: 64px;
+    padding-inline: 24px;
+  }
+
+  .app-main {
+    padding-top: 72px;
+    padding-bottom: 80px;
+  }
+
+  .app-main-inner {
+    padding-inline: 24px;
+  }
+}
