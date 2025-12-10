@@ -337,3 +337,123 @@ a {
     margin: 0 auto;
   }
 }
+
+
+
+
+/* === CNIGA WIGC overrides – keep everything above as-is === */
+
+/* 1. Fullscreen app background & no black bars */
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.app-shell {
+  min-height: 100vh;
+  width: 100%;
+  /* You already set the backgroundImage inline in Layout.jsx –
+     these properties make it behave full-screen */
+  background-color: #000; /* fallback */
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* Make sure the content scrolls over the background image */
+.app-main {
+  background: transparent;
+}
+
+/* Header bar always in burnt red */
+.app-header {
+  background-color: #f86c4f !important; /* CNIGA burnt red */
+}
+
+/* 2. Sponsors grid: 2 per row on mobile, 3 per row on desktop,
+      bigger logos */
+.sponsor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: center;
+  justify-items: center;
+}
+
+@media (min-width: 768px) {
+  .sponsor-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Bigger logos – this will override the smaller size from the build */
+.sponsor-logo {
+  max-width: 150px;
+  max-height: 90px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* 3. Schedule controls: search + track select + view buttons */
+/* Wrap search + track + buttons in .schedule-controls in JSX (see below) */
+.schedule-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+@media (min-width: 640px) {
+  .schedule-controls {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* Wrap just the search + track select in .schedule-search-and-track */
+.schedule-search-and-track {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (min-width: 480px) {
+  .schedule-search-and-track {
+    flex-direction: row;
+  }
+}
+
+/* Search + track inputs share a common look */
+.schedule-search-input,
+.schedule-track-select {
+  flex: 1;
+  min-width: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  background: rgba(15, 23, 42, 0.92);
+  color: #f9fafb;
+  outline: none;
+}
+
+.schedule-search-input::placeholder {
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.schedule-search-input:focus,
+.schedule-track-select:focus {
+  border-color: #f86c4f;
+  box-shadow: 0 0 0 2px rgba(248, 108, 79, 0.35);
+}
+
+/* You already have .schedule-filters + .schedule-filter-btn in your build;
+   this just keeps the burnt red active pill consistent. */
+.schedule-filter-btn-active {
+  background: #f86c4f;
+  color: #111827;
+}
+
