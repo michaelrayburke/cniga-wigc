@@ -36,13 +36,23 @@ export default function Welcome() {
 
   return (
     <div className="welcome-root">
+      {/* Heading chip + ghost-yellow welcome box */}
+      <div className="welcome-heading">Welcome</div>
+
       <section className="welcome-intro">
-        <h2>Welcome!</h2>
+        <h2>Western Indian Gaming Conference 2026</h2>
+        <p>
+          Thank you for joining us at Pechanga Resort Casino. Use this app to
+          explore the schedule, learn about our presenters, and discover the
+          sponsors who help make WIGC possible.
+        </p>
       </section>
 
+      {/* Sponsors by level */}
       {groups.map((group) => (
-        <section key={group.label} className="sponsor-group">
-          <h3>{group.label}</h3>
+        <section key={group.label} className="sponsor-section">
+          <h2 className="sponsor-section-title">{group.label}</h2>
+
           <div className="sponsor-grid">
             {group.sponsors.map((sponsor) => (
               <a
