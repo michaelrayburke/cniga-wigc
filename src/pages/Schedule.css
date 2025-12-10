@@ -1,93 +1,109 @@
-.schedule-filters {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+/* src/pages/Schedule.css */
+
+:root {
+  --cniga-burnt-red: #f86c4f;
+  --cniga-ghost-yellow: #ffeccd;
 }
 
-.schedule-filter-btn {
-  flex: 1;
-  font-size: 0.8rem;
-  padding: 6px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: transparent;
-  color: #cbd5f5;
-  cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
-}
-
-.schedule-filter-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.schedule-filter-btn-active {
-  background: rgba(255, 255, 255, 0.14);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
+/* Root container */
 .schedule-root {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
-.schedule-filters-root {
+/* Filters row stays as-is but you can tune later */
+.schedule-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.schedule-filter-btn {
+  flex: 1 1 auto;
+  border-radius: 999px;
+  border: none;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.35);
+  color: #f9fafb;
+}
+
+.schedule-filter-btn-active {
+  background: #ffffff;
+  color: var(--cniga-burnt-red);
+}
+
+/* Day sections */
+.schedule-section {
+  margin-bottom: 12px;
+}
+
+/* Day header bar */
+.schedule-section > h2 {
+  margin: 0 0 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--cniga-burnt-red); /* burnt red bar */
+  color: #ffffff; /* white text */
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* List of cards */
+.schedule-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.schedule-search-row {
-  display: flex;
-  gap: 8px;
+/* Event card – ghost yellow with light translucency */
+.schedule-card {
+  border-radius: 18px;
+  padding: 10px 14px;
+  background: rgba(255, 236, 205, 0.92); /* ghost yellow, slightly transparent */
+  color: #111111; /* dark text */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
-.schedule-search-input {
-  flex: 1;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(0, 0, 0, 0.2);
-  color: #e5ecff;
-  font-size: 0.85rem;
-}
-
-.schedule-search-input::placeholder {
-  color: rgba(229, 236, 255, 0.6);
-}
-
-.schedule-track-select {
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(0, 0, 0, 0.2);
-  color: #e5ecff;
+/* Meta line (time, room, track, etc.) */
+.schedule-meta p {
+  margin: 0 0 4px;
   font-size: 0.8rem;
 }
 
-.schedule-card-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+/* Title */
+.schedule-title {
+  margin: 4px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
-.schedule-star-btn {
-  border: none;
-  background: transparent;
-  font-size: 1.1rem;
-  line-height: 1;
-  cursor: pointer;
-  padding: 2px 4px;
-  color: rgba(255, 255, 255, 0.35);
-  transition: transform 0.1s ease, color 0.1s ease;
+/* Description text */
+.schedule-body {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  line-height: 1.4;
 }
 
-.schedule-star-btn:hover {
-  transform: scale(1.1);
-  color: rgba(255, 255, 255, 0.7);
+/* Make links inside description readable */
+.schedule-body a {
+  color: #003f7f;
+  text-decoration: underline;
 }
 
-.schedule-star-btn-on {
-  color: #ffd66b;
+/* Slightly larger on tablet+ */
+@media (min-width: 768px) {
+  .schedule-card {
+    padding: 12px 18px;
+  }
+
+  .schedule-title {
+    font-size: 1rem;
+  }
 }
