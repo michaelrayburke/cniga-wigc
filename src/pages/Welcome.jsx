@@ -37,12 +37,7 @@ export default function Welcome() {
   return (
     <div className="welcome-root">
       <section className="welcome-intro">
-        <h2>Welcome</h2>
-        <p>
-          This is a preview of the Western Indian Gaming Conference attendee app.
-          The final version can include personalized schedules, push-style
-          updates, and tools for exhibitors and attendees.
-        </p>
+        <h2>Welcome!</h2>
       </section>
 
       {groups.map((group) => (
