@@ -1,232 +1,122 @@
-/* src/components/LoginScreen.css */
+/* src/components/Layout.css */
 
 :root {
   --cniga-burnt-red: #f86c4f;
   --cniga-slate-gray: #4b4b4b;
   --cniga-ghost-yellow: #ffeccd;
-  --cniga-cool-gray: #c8c8c8;
+  --cniga-dim-gray: #828282;
 }
 
-.login-root {
-  position: relative;
-  min-height: 100vh;
-  width: 100%;
-  overflow: hidden;
-  font-family: "Mark Pro", system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
-  color: #ffffff;
-}
-
-/* Video */
-.login-video-layer {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: 0;
-}
-
-.login-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.login-video-overlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-      circle at top,
-      rgba(0, 0, 0, 0.2),
-      transparent 40%
-    ),
-    rgba(6, 10, 18, 0.82);
-}
-
-/* Foreground content */
-.login-content {
-  position: relative;
-  z-index: 1;
+/* App shell with background image */
+.app-shell {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
+  background: #111;
+  background-image: url("../assets/bg1.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #f9fafb;
+}
+
+/* Top orange bar */
+.app-header {
+  display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 10px 32px;
+  background: var(--cniga-burnt-red);
+  color: #fff8f1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.app-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-header-logo {
+  height: 32px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.app-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app-header-title {
+  font-family: "Tiempos Headline", "Georgia", "Times New Roman", serif;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.app-header-subtitle {
+  font-family: "Mark Pro", system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+/* Tabs */
+.app-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-tab {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: #fff8f1;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.app-tab:hover {
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.app-tab-active {
+  background: #fff8f1;
+  color: var(--cniga-burnt-red);
+}
+
+/* Main area */
+.app-main {
+  flex: 1;
   padding: 24px;
 }
 
-.login-stack {
-  width: 100%;
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-  text-align: center;
+/* Generic card style for inner pages (e.g., your beige boxes) */
+.app-card {
+  background: rgba(255, 236, 205, 0.95); /* ghost yellow */
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
-/* Logo on top */
-.login-logo-wrap {
-  display: flex;
-  justify-content: center;
-}
-
-.login-brand-mark {
-  width: 60px;
-  height: 60px;
-}
-
-/* Heading text directly under logo */
-.login-brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.login-brand-line-1 {
-  font-family: "Tiempos Headline", "Georgia", "Times New Roman", serif;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  color: var(--cniga-burnt-red); /* title in burnt red */
-}
-
-.login-brand-line-2 {
-  font-family: "Mark Pro", system-ui, sans-serif;
-  font-weight: 400;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--cniga-ghost-yellow); /* tagline in ghost yellow */
-}
-
-/* PURE form – NO module background */
-.login-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  /* no background, no radius, no shadow */
-  padding: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.login-label {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 600;
-  color: #f5f5f5;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: left;
-}
-
-.login-input {
+/* You can use these for date headers & sponsor section titles */
+.app-section-heading {
+  display: inline-block;
+  padding: 6px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 10px 14px;
-  font-size: 0.9rem;
-  outline: none;
-  background: rgba(10, 14, 26, 0.9);
-  color: #f9fafb;
-}
-
-.login-input::placeholder {
-  color: rgba(248, 250, 252, 0.5);
-}
-
-.login-input:focus {
-  border-color: var(--cniga-burnt-red);
-  box-shadow: 0 0 0 2px rgba(248, 108, 79, 0.3);
-}
-
-.login-password-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.login-input-password {
-  flex: 1;
-}
-
-.login-toggle-password {
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 7px 12px;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  background: transparent;
-  cursor: pointer;
-  color: #f9fafb;
-}
-
-.login-toggle-password:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-/* Error + hint */
-.login-error {
-  color: #ffb3b3;
-  font-size: 0.75rem;
-}
-
-.login-hint {
-  font-size: 0.75rem;
-  color: rgba(241, 245, 249, 0.75);
-  margin-top: 4px;
-}
-
-/* Button: burnt red, cool gray on hover/pressed */
-.login-button {
-  margin-top: 10px;
-  border: none;
-  border-radius: 999px;
-  padding: 11px 18px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
   background: var(--cniga-burnt-red);
   color: #fff8f1;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.75);
-  transition: background 0.15s ease, color 0.15s ease,
-    transform 0.08s ease, box-shadow 0.08s ease;
-}
-
-.login-button:hover {
-  background: var(--cniga-cool-gray);
-  color: #111827;
-}
-
-.login-button:active {
-  background: var(--cniga-cool-gray);
-  color: #111827;
-  transform: translateY(1px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.8);
-}
-
-/* Mobile: lift stack a bit */
-@media (max-width: 600px) {
-  .login-content {
-    align-items: flex-start;
-    padding-top: 16vh;
-  }
-
-  .login-brand-mark {
-    width: 50px;
-    height: 50px;
-  }
-
-  .login-brand-line-1 {
-    font-size: 0.85rem;
-  }
-
-  .login-brand-line-2 {
-    font-size: 0.75rem;
-  }
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
 }
