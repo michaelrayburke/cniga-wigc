@@ -308,12 +308,6 @@ a {
   gap: 10px;
 }
 
-.schedule-card {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  padding: 10px 11px;
-}
-
 .schedule-meta {
   font-size: 0.75rem;
   opacity: 0.8;
