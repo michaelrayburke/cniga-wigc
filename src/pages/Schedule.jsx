@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { fetchScheduleData } from "../api/wp";
 import "./Schedule.css";
 
-const STAR_STORAGE_KEY = "wigc_starred_events";
-
 export default function Schedule() {
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState([]);
@@ -12,19 +10,17 @@ export default function Schedule() {
   const [allEvents, setAllEvents] = useState([]);
   const [error, setError] = useState("");
   const [view, setView] = useState("all"); // all | sessions | socials
-  const [searchTerm, setSearchTerm] = useState("");
   const [trackFilter, setTrackFilter] = useState("all");
+  const [search, setSearch] = useState("");
   const [starredIds, setStarredIds] = useState(() => {
     try {
-      const raw = localStorage.getItem(STAR_STORAGE_KEY);
-      if (!raw) return new Set();
-      return new Set(JSON.parse(raw));
+      const raw = localStorage.getItem("cniga_starred_events");
+      return raw ? JSON.parse(raw) : [];
     } catch {
-      return new Set();
+      return [];
     }
   });
 
-  // Load schedule once
   useEffect(() => {
     (async () => {
       try {
@@ -41,29 +37,20 @@ export default function Schedule() {
     })();
   }, []);
 
-  // Persist stars
+  // persist stars locally (placeholder RSVP)
   useEffect(() => {
     try {
-      localStorage.setItem(
-        STAR_STORAGE_KEY,
-        JSON.stringify(Array.from(starredIds))
-      );
+      localStorage.setItem("cniga_starred_events", JSON.stringify(starredIds));
     } catch {
       // ignore
     }
   }, [starredIds]);
 
-  const toggleStar = (id) => {
-    setStarredIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
+  function toggleStar(id) {
+    setStarredIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
 
   if (loading) {
     return <p className="app-status-text">Loading schedule…</p>;
@@ -73,7 +60,6 @@ export default function Schedule() {
     return <p className="app-status-text app-status-error">{error}</p>;
   }
 
-  // Determine base events by view
   let baseEvents;
   if (view === "sessions") {
     baseEvents = sessions;
@@ -83,33 +69,40 @@ export default function Schedule() {
     baseEvents = allEvents;
   }
 
-  // Track list is built from sessions only
-  const trackSet = new Set(
-    sessions.map((e) => e.track).filter((t) => t && t.trim())
-  );
-  const trackOptions = ["all", ...Array.from(trackSet).sort()];
+  // Collect tracks for dropdown (only from sessions)
+  const allTracks = Array.from(
+    new Set(
+      sessions
+        .map((e) => e.track)
+        .filter((t) => t && typeof t === "string")
+        .map((t) => t.trim())
+    )
+  ).sort((a, b) => a.localeCompare(b));
 
-  // Apply track filter (for seminars view only)
-  let filtered = baseEvents;
-  if (view === "sessions" && trackFilter !== "all") {
-    filtered = filtered.filter((e) => e.track === trackFilter);
-  }
+  // Apply search + track filter
+  const filtered = baseEvents.filter((e) => {
+    if (view === "sessions" && trackFilter !== "all") {
+      if (!e.track || e.track.trim() !== trackFilter) return false;
+    }
 
-  // Apply search filter across title, track, room, and description
-  const term = searchTerm.trim().toLowerCase();
-  if (term) {
-    filtered = filtered.filter((e) => {
-      const haystack = [
-        e.title || "",
-        e.track || "",
-        e.room || "",
-        e.contentHtml || "",
-      ]
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(term);
-    });
-  }
+    if (!search.trim()) return true;
+
+    const q = search.toLowerCase();
+    const haystack = [
+      e.title,
+      e.track,
+      e.room,
+      e.date,
+      e.contentHtml,
+      ...(e.speakers || []).map((sp) => sp.name),
+      e.moderator?.name,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return haystack.includes(q);
+  });
 
   if (!filtered.length) {
     return (
@@ -117,11 +110,11 @@ export default function Schedule() {
         <ScheduleFilters
           view={view}
           setView={setView}
-          trackOptions={trackOptions}
+          search={search}
+          setSearch={setSearch}
           trackFilter={trackFilter}
           setTrackFilter={setTrackFilter}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
+          tracks={allTracks}
         />
         <p className="app-status-text">No events found for this view.</p>
       </div>
@@ -136,7 +129,7 @@ export default function Schedule() {
     return (a.title || "").localeCompare(b.title || "");
   });
 
-  // Group by day (heading), using dayKey/date
+  // Group by day
   const dayMap = new Map();
   for (const ev of sorted) {
     const key = ev.dayKey || ev.date || "Other";
@@ -158,36 +151,43 @@ export default function Schedule() {
       <ScheduleFilters
         view={view}
         setView={setView}
-        trackOptions={trackOptions}
+        search={search}
+        setSearch={setSearch}
         trackFilter={trackFilter}
         setTrackFilter={setTrackFilter}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
+        tracks={allTracks}
       />
 
       {dayGroups.map((day) => (
         <section key={day.key} className="schedule-section">
-          <h2>{day.label}</h2>
+          <h2 className="schedule-day-heading">{day.label}</h2>
           <div className="schedule-list">
-            {day.events.map((e) => (
-              <article key={e.id} className="schedule-card">
-                <div className="schedule-card-header">
-                  <button
-                    type="button"
-                    className={
-                      "schedule-star-btn" +
-                      (starredIds.has(e.id) ? " schedule-star-btn-on" : "")
-                    }
-                    onClick={() => toggleStar(e.id)}
-                    aria-pressed={starredIds.has(e.id)}
-                    aria-label={
-                      starredIds.has(e.id)
-                        ? "Remove from My Schedule"
-                        : "Add to My Schedule"
-                    }
-                  >
-                    {starredIds.has(e.id) ? "★" : "☆"}
-                  </button>
+            {day.events.map((e) => {
+              const starred = starredIds.includes(e.id);
+              return (
+                <article key={e.id} className="schedule-card">
+                  <header className="schedule-card-header">
+                    <h3
+                      className="schedule-title"
+                      dangerouslySetInnerHTML={{ __html: e.title }}
+                    />
+                    <button
+                      type="button"
+                      className={
+                        "schedule-star-btn" +
+                        (starred ? " schedule-star-btn-active" : "")
+                      }
+                      onClick={() => toggleStar(e.id)}
+                      aria-pressed={starred}
+                      aria-label={
+                        starred
+                          ? "Remove from my schedule"
+                          : "Add to my schedule"
+                      }
+                    >
+                      ★
+                    </button>
+                  </header>
 
                   <div className="schedule-meta">
                     {(e.startTime || e.endTime || e.room) && (
@@ -241,20 +241,16 @@ export default function Schedule() {
                       </p>
                     )}
                   </div>
-                </div>
 
-                <h3
-                  className="schedule-title"
-                  dangerouslySetInnerHTML={{ __html: e.title }}
-                />
-                {e.contentHtml && (
-                  <div
-                    className="schedule-body"
-                    dangerouslySetInnerHTML={{ __html: e.contentHtml }}
-                  />
-                )}
-              </article>
-            ))}
+                  {e.contentHtml && (
+                    <div
+                      className="schedule-body"
+                      dangerouslySetInnerHTML={{ __html: e.contentHtml }}
+                    />
+                  )}
+                </article>
+              );
+            })}
           </div>
         </section>
       ))}
@@ -265,19 +261,18 @@ export default function Schedule() {
 function ScheduleFilters({
   view,
   setView,
-  trackOptions,
+  search,
+  setSearch,
   trackFilter,
   setTrackFilter,
-  searchTerm,
-  setSearchTerm,
+  tracks,
 }) {
   return (
-    <div className="schedule-filters-root">
-      <div className="schedule-filters">
+    <div className="schedule-filters">
+      <div className="schedule-view-tabs">
         <button
           className={
-            "schedule-filter-btn" +
-            (view === "all" ? " schedule-filter-btn-active" : "")
+            "schedule-view-tab" + (view === "all" ? " schedule-view-tab-active" : "")
           }
           onClick={() => setView("all")}
         >
@@ -285,8 +280,8 @@ function ScheduleFilters({
         </button>
         <button
           className={
-            "schedule-filter-btn" +
-            (view === "sessions" ? " schedule-filter-btn-active" : "")
+            "schedule-view-tab" +
+            (view === "sessions" ? " schedule-view-tab-active" : "")
           }
           onClick={() => setView("sessions")}
         >
@@ -294,8 +289,8 @@ function ScheduleFilters({
         </button>
         <button
           className={
-            "schedule-filter-btn" +
-            (view === "socials" ? " schedule-filter-btn-active" : "")
+            "schedule-view-tab" +
+            (view === "socials" ? " schedule-view-tab-active" : "")
           }
           onClick={() => setView("socials")}
         >
@@ -303,29 +298,30 @@ function ScheduleFilters({
         </button>
       </div>
 
-      <div className="schedule-search-row">
+      <div className="schedule-filter-row">
         <input
           type="search"
           className="schedule-search-input"
           placeholder="Search events, tracks, rooms…"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
 
-        {/* Track filter only really matters for seminars */}
-        {view === "sessions" && trackOptions.length > 1 && (
-  <select
-    className="schedule-track-select"
-    value={trackFilter}
-    onChange={(e) => setTrackFilter(e.target.value)}
-  >
-    {trackOptions.map((t) => (
-      <option key={t} value={t}>
-        {t === "all" ? "All tracks" : t}
-      </option>
-    ))}
-  </select>
-)}
+        {/* Track dropdown only when Seminars view is active */}
+        {view === "sessions" && tracks.length > 0 && (
+          <select
+            className="schedule-track-select"
+            value={trackFilter}
+            onChange={(e) => setTrackFilter(e.target.value)}
+          >
+            <option value="all">All tracks</option>
+            {tracks.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
     </div>
   );
