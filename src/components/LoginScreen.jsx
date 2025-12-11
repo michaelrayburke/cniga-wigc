@@ -7,7 +7,6 @@ import cnigaLogo from "../assets/cniga-logo.svg";
 import { supabase } from "../lib/supabaseClient";
 import { ensureAttendeeProfile } from "../lib/profileHydration";
 
-
 export default function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,6 +51,7 @@ export default function LoginScreen({ onLogin }) {
         }
 
         setMessage("Signed in successfully.");
+
         // onLogin is no longer required, AuthContext handles UI, but we keep this harmlessly:
         if (typeof onLogin === "function") {
           onLogin(session);
@@ -78,7 +78,7 @@ export default function LoginScreen({ onLogin }) {
             onLogin(session);
           }
         } else {
-          // If email confirmation is ON, they must confirm via link
+          // If email confirmation is ON, they must confirm via email
           setMessage(
             "Account created. Please check your email to confirm your address."
           );
@@ -90,7 +90,7 @@ export default function LoginScreen({ onLogin }) {
     } finally {
       setLoading(false);
     }
-
+  }
 
   return (
     <div className="login-root">
@@ -204,7 +204,6 @@ export default function LoginScreen({ onLogin }) {
                 : "Already have an account? Log in"}
             </button>
 
-            {/* Old demo hint removed / replaced */}
             <p className="login-hint">
               Use the email you registered with for WIGC to access your
               profile and schedule.
@@ -214,4 +213,4 @@ export default function LoginScreen({ onLogin }) {
       </div>
     </div>
   );
-        }
+}
