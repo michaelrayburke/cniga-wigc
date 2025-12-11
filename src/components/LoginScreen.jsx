@@ -5,6 +5,8 @@ import "./LoginScreen.css";
 import loginVideo from "../assets/wigc20242025timel.mp4";
 import cnigaLogo from "../assets/cniga-logo.svg";
 import { supabase } from "../lib/supabaseClient";
+import { ensureAttendeeProfile } from "../lib/profileHydration";
+
 
 export default function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState("");
