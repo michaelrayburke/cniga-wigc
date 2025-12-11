@@ -43,12 +43,18 @@ export default function LoginScreen({ onLogin }) {
           throw signInError;
         }
 
-        // Optional: show a small message
-        setMessage("Signed in successfully.");
+        const session = data?.session || null;
+        const user = session?.user || null;
 
-        // Notify parent that login succeeded
+        // 🔹 Hydrate profile from legacy Adalo data, if needed
+        if (user) {
+          await ensureAttendeeProfile(user);
+        }
+
+        setMessage("Signed in successfully.");
+        // onLogin is no longer required, AuthContext handles UI, but we keep this harmlessly:
         if (typeof onLogin === "function") {
-          onLogin(data?.session || null);
+          onLogin(session);
         }
       } else {
         // New user sign-up
@@ -61,15 +67,18 @@ export default function LoginScreen({ onLogin }) {
           throw signUpError;
         }
 
-        // Depending on your Supabase email confirmation settings:
-        // - If email confirmation is OFF, data.session will be set and user is logged in.
-        // - If email confirmation is ON, they must confirm via email first.
-        if (data?.session) {
+        const session = data?.session || null;
+        const user = session?.user || null;
+
+        if (session && user) {
+          // If email confirmation is OFF, session exists and user is logged in
+          await ensureAttendeeProfile(user);
           setMessage("Account created and signed in.");
           if (typeof onLogin === "function") {
-            onLogin(data.session);
+            onLogin(session);
           }
         } else {
+          // If email confirmation is ON, they must confirm via link
           setMessage(
             "Account created. Please check your email to confirm your address."
           );
@@ -81,7 +90,7 @@ export default function LoginScreen({ onLogin }) {
     } finally {
       setLoading(false);
     }
-  }
+
 
   return (
     <div className="login-root">
