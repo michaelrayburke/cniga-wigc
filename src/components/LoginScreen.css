@@ -228,3 +228,34 @@
     font-size: 0.8rem;
   }
 }
+
+/* Simple pill switcher for auth mode */
+.login-auth-switch {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 12px 0 18px;
+}
+
+.login-auth-pill {
+  border: 1px solid rgba(255, 236, 205, 0.55);
+  background: rgba(0, 0, 0, 0.25);
+  color: #ffeccd;
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.login-auth-pill-active {
+  background: rgba(255, 236, 205, 0.9);
+  color: #2b2b2b;
+  border-color: rgba(255, 236, 205, 0.9);
+}
+
+.login-message {
+  margin: 10px 0 0;
+  color: #ffeccd;
+  font-weight: 600;
+}
+
