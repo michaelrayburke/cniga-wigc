@@ -162,6 +162,7 @@
   background-position: center;
   background-repeat: no-repeat;
   z-index: 0;
+  pointer-events: none;
 }
 
 /* Keep header, main content, and bottom nav above background */
@@ -230,6 +231,8 @@
 .app-main {
   padding-top: 64px;
   padding-bottom: 72px;
+  position: relative;
+  z-index: 1;
 }
 
 .app-main-inner {
@@ -303,7 +306,6 @@
 
 .profile-menu {
   position: absolute;
-  right: 0;
   min-width: 170px;
   padding: 8px;
   border-radius: 14px;
