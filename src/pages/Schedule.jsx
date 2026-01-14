@@ -168,15 +168,18 @@ export default function Schedule() {
 
   // Track dropdown options (from sessions)
   const allTracks = useMemo(() => {
-    return Array.from(
-      new Set(
-        sessions
-          .map((e) => e.track)
-          .filter((t) => t && typeof t === "string")
-          .map((t) => t.trim())
-      )
-    ).sort((a, b) => a.localeCompare(b));
-  }, [sessions]);
+  const list = Array.isArray(sessions) ? sessions : [];
+
+  return Array.from(
+    new Set(
+      list
+        .map((e) => e?.track)
+        .filter((t) => typeof t === "string" && t.trim())
+        .map((t) => t.trim())
+    )
+  ).sort((a, b) => a.localeCompare(b));
+}, [sessions]);
+
 
   // Choose base list by view
   let baseEvents;
