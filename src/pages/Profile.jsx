@@ -6,6 +6,25 @@ import { useAuth } from "../context/AuthContext";
 import { ensureAttendeeProfile } from "../lib/profileHydration";
 import { QRCodeCanvas } from "qrcode.react";
 
+function normalizeAvatarUrl(value) {
+  if (!value) return "";
+  const v = String(value).trim();
+
+  // If Adalo imported JSON like {"url":"https://...","filename":"..."}
+  if (v.startsWith("{")) {
+    try {
+      const obj = JSON.parse(v);
+      if (obj?.url) return obj.url;
+    } catch {
+      // ignore
+    }
+  }
+
+  // Otherwise assume it's already a URL
+  return v;
+}
+
+
 export default function Profile() {
   const { user, signOut } = useAuth();
 
@@ -52,7 +71,7 @@ export default function Profile() {
         setName(data?.name || "");
         setPhone(data?.phone || "");
         setBio(data?.bio || "");
-        setAvatarUrl(data?.avatar_url || "");
+        setAvatarUrl(normalizeAvatarUrl(data?.avatar_url || ""));
         setEmail(user.email || data?.email || "");
       } catch (e) {
         console.error(e);
@@ -80,7 +99,7 @@ export default function Profile() {
         name: name.trim() || null,
         phone: phone.trim() || null,
         bio: bio.trim() || null,
-        avatar_url: avatarUrl.trim() || null,
+        avatar_url: normalizeAvatarUrl(avatarUrl) || null,
       };
 
       const { error: updateError } = await supabase
