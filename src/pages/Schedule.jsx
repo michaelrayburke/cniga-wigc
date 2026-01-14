@@ -24,30 +24,42 @@ export default function Schedule() {
   const [favoritesError, setFavoritesError] = useState("");
 
   // 1) Load schedule from WP
- useEffect(() => {
-  (async () => {
-    try {
-      const result = await fetchScheduleData();
+  useEffect(() => {
+    (async () => {
+      try {
+        const result = await fetchScheduleData();
 
-setSessions(Array.isArray(result?.sessions) ? result.sessions : []);
-setSocials(Array.isArray(result?.socials) ? result.socials : []);
-setAllEvents(
-  Array.isArray(result?.allEvents)
-    ? result.allEvents
-    : Array.isArray(result?.events)
-    ? result.events
-    : []
-);
+        setSessions(Array.isArray(result?.sessions) ? result.sessions : []);
+        setSocials(Array.isArray(result?.socials) ? result.socials : []);
+        setAllEvents(
+          Array.isArray(result?.allEvents)
+            ? result.allEvents
+            : Array.isArray(result?.events)
+            ? result.events
+            : []
+        );
+      } catch (err) {
+        console.error(err);
+        setError("Unable to load schedule.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
-    } catch (err) {
-      console.error(err);
-      setError("Unable to load schedule.");
-    } finally {
-      setLoading(false);
-    }
-  })();
-}, []);
+  // Track dropdown options (from sessions) — MUST be above early returns
+  const allTracks = useMemo(() => {
+    const list = Array.isArray(sessions) ? sessions : [];
 
+    return Array.from(
+      new Set(
+        list
+          .map((e) => e?.track)
+          .filter((t) => typeof t === "string" && t.trim())
+          .map((t) => t.trim())
+      )
+    ).sort((a, b) => a.localeCompare(b));
+  }, [sessions]);
 
   // 2) Load favorites from Supabase (and migrate localStorage once)
   useEffect(() => {
@@ -162,26 +174,12 @@ setAllEvents(
   if (loading) return <p className="app-status-text">Loading schedule…</p>;
   if (error) return <p className="app-status-text app-status-error">{error}</p>;
 
-  // Track dropdown options (from sessions)
-  const allTracks = useMemo(() => {
-  const list = Array.isArray(sessions) ? sessions : [];
-
-  return Array.from(
-    new Set(
-      list
-        .map((e) => e?.track)
-        .filter((t) => typeof t === "string" && t.trim())
-        .map((t) => t.trim())
-    )
-  ).sort((a, b) => a.localeCompare(b));
-}, [sessions]);
-
-
   // Choose base list by view
   let baseEvents;
   if (view === "sessions") baseEvents = sessions;
   else if (view === "socials") baseEvents = socials;
-  else if (view === "mine") baseEvents = allEvents.filter((e) => starredIds.includes(String(e.id)));
+  else if (view === "mine")
+    baseEvents = allEvents.filter((e) => starredIds.includes(String(e.id)));
   else baseEvents = allEvents;
 
   // Apply search + track filter
@@ -335,7 +333,13 @@ setAllEvents(
                           <span>
                             Speakers:{" "}
                             {e.speakers
-                              .map((sp) => sp?.name || [sp?.firstName, sp?.lastName].filter(Boolean).join(" "))
+                              .map(
+                                (sp) =>
+                                  sp?.name ||
+                                  [sp?.firstName, sp?.lastName]
+                                    .filter(Boolean)
+                                    .join(" ")
+                              )
                               .filter(Boolean)
                               .join(", ")}
                           </span>
@@ -380,28 +384,38 @@ function ScheduleFilters({
     <div className="schedule-filters">
       <div className="schedule-view-tabs">
         <button
-          className={"schedule-view-tab" + (view === "all" ? " schedule-view-tab-active" : "")}
+          className={
+            "schedule-view-tab" + (view === "all" ? " schedule-view-tab-active" : "")
+          }
           onClick={() => setView("all")}
         >
           Full schedule
         </button>
 
         <button
-          className={"schedule-view-tab" + (view === "mine" ? " schedule-view-tab-active" : "")}
+          className={
+            "schedule-view-tab" + (view === "mine" ? " schedule-view-tab-active" : "")
+          }
           onClick={() => setView("mine")}
         >
           My schedule{typeof favoritesCount === "number" ? ` (${favoritesCount})` : ""}
         </button>
 
         <button
-          className={"schedule-view-tab" + (view === "sessions" ? " schedule-view-tab-active" : "")}
+          className={
+            "schedule-view-tab" +
+            (view === "sessions" ? " schedule-view-tab-active" : "")
+          }
           onClick={() => setView("sessions")}
         >
           Seminars
         </button>
 
         <button
-          className={"schedule-view-tab" + (view === "socials" ? " schedule-view-tab-active" : "")}
+          className={
+            "schedule-view-tab" +
+            (view === "socials" ? " schedule-view-tab-active" : "")
+          }
           onClick={() => setView("socials")}
         >
           Social
