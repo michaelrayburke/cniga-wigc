@@ -28,22 +28,17 @@ export default function Schedule() {
   (async () => {
     try {
       const result = await fetchScheduleData();
-      console.log("fetchScheduleData result:", result);
 
-      // SAFETY DEFAULTS (prevents "blank screen" crashes)
-      const nextSessions = Array.isArray(result?.sessions) ? result.sessions : [];
-      const nextSocials = Array.isArray(result?.socials) ? result.socials : [];
+setSessions(Array.isArray(result?.sessions) ? result.sessions : []);
+setSocials(Array.isArray(result?.socials) ? result.socials : []);
+setAllEvents(
+  Array.isArray(result?.allEvents)
+    ? result.allEvents
+    : Array.isArray(result?.events)
+    ? result.events
+    : []
+);
 
-      // IMPORTANT: some versions return "events" instead of "allEvents"
-      const nextAllEvents = Array.isArray(result?.allEvents)
-        ? result.allEvents
-        : Array.isArray(result?.events)
-        ? result.events
-        : [];
-
-      setSessions(nextSessions);
-      setSocials(nextSocials);
-      setAllEvents(nextAllEvents);
     } catch (err) {
       console.error(err);
       setError("Unable to load schedule.");
