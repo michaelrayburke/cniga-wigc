@@ -28,6 +28,7 @@ export default function Schedule() {
   (async () => {
     try {
       const result = await fetchScheduleData();
+      console.log("fetchScheduleData result:", result);
 
       // SAFETY DEFAULTS (prevents "blank screen" crashes)
       const nextSessions = Array.isArray(result?.sessions) ? result.sessions : [];
