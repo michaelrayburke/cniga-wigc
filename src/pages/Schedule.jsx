@@ -19,6 +19,9 @@ export default function Schedule() {
   const [trackFilter, setTrackFilter] = useState("all");
   const [search, setSearch] = useState("");
 
+  // NEW: show/hide past events across all views
+  const [showPast, setShowPast] = useState(false);
+
   const [starredIds, setStarredIds] = useState([]);
   const [favoritesLoading, setFavoritesLoading] = useState(true);
   const [favoritesError, setFavoritesError] = useState("");
@@ -60,6 +63,47 @@ export default function Schedule() {
       )
     ).sort((a, b) => a.localeCompare(b));
   }, [sessions]);
+
+  // Helper: parse "11:10 am" on a given dayKey ("2025-02-27") into a Date (local time)
+  function parseEventDateTime(ev, timeStr) {
+    const day = ev?.dayKey || "";
+    if (!day || !timeStr) return null;
+
+    const m = String(timeStr)
+      .trim()
+      .match(/^(\d{1,2}):(\d{2})\s*(am|pm)$/i);
+    if (!m) return null;
+
+    let hh = parseInt(m[1], 10);
+    const mm = parseInt(m[2], 10);
+    const ap = m[3].toLowerCase();
+
+    if (ap === "pm" && hh !== 12) hh += 12;
+    if (ap === "am" && hh === 12) hh = 0;
+
+    const iso = `${day}T${String(hh).padStart(2, "0")}:${String(mm).padStart(
+      2,
+      "0"
+    )}:00`;
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  // Smarter end-time logic:
+  // - If endTime exists, use it.
+  // - If endTime missing but startTime exists, treat as 60 minutes long.
+  // - If we can't parse anything, return null (we'll keep the event to avoid accidental hiding).
+  function getEventEnd(ev) {
+    const explicitEnd = parseEventDateTime(ev, ev?.endTime);
+    if (explicitEnd) return explicitEnd;
+
+    const start = parseEventDateTime(ev, ev?.startTime);
+    if (start) {
+      return new Date(start.getTime() + 60 * 60 * 1000); // +60 minutes
+    }
+
+    return null;
+  }
 
   // 2) Load favorites from Supabase (and migrate localStorage once)
   useEffect(() => {
@@ -182,8 +226,18 @@ export default function Schedule() {
     baseEvents = allEvents.filter((e) => starredIds.includes(String(e.id)));
   else baseEvents = allEvents;
 
-  // Apply search + track filter
-  const filtered = baseEvents.filter((e) => {
+  // NEW: time-based filtering (hide past unless toggled on)
+  const now = new Date();
+  const timeFilteredBase = showPast
+    ? baseEvents
+    : baseEvents.filter((ev) => {
+        const end = getEventEnd(ev);
+        if (!end) return true; // keep if we can't parse (avoid hiding good data)
+        return end >= now;
+      });
+
+  // Apply search + track filter (after time filter)
+  const filtered = timeFilteredBase.filter((e) => {
     // Track filter allowed for sessions OR mine (mine might include sessions)
     if ((view === "sessions" || view === "mine") && trackFilter !== "all") {
       if (!e.track || e.track.trim() !== trackFilter) return false;
@@ -220,6 +274,8 @@ export default function Schedule() {
           setTrackFilter={setTrackFilter}
           tracks={allTracks}
           favoritesCount={starredIds.length}
+          showPast={showPast}
+          setShowPast={setShowPast}
         />
         {favoritesLoading ? (
           <p className="app-status-text">Loading your schedule…</p>
@@ -266,6 +322,8 @@ export default function Schedule() {
         setTrackFilter={setTrackFilter}
         tracks={allTracks}
         favoritesCount={starredIds.length}
+        showPast={showPast}
+        setShowPast={setShowPast}
       />
 
       {favoritesError && (
@@ -296,10 +354,18 @@ export default function Schedule() {
                       onClick={() => toggleStar(id)}
                       aria-pressed={starred}
                       aria-label={
-                        starred ? "Remove from my schedule" : "Add to my schedule"
+                        starred
+                          ? "Remove from my schedule"
+                          : "Add to my schedule"
                       }
                       disabled={favoritesLoading}
-                      title={favoritesLoading ? "Loading…" : starred ? "Remove" : "Add"}
+                      title={
+                        favoritesLoading
+                          ? "Loading…"
+                          : starred
+                          ? "Remove"
+                          : "Add"
+                      }
                     >
                       ★
                     </button>
@@ -379,6 +445,8 @@ function ScheduleFilters({
   setTrackFilter,
   tracks,
   favoritesCount,
+  showPast,
+  setShowPast,
 }) {
   return (
     <div className="schedule-filters">
@@ -445,6 +513,15 @@ function ScheduleFilters({
             ))}
           </select>
         )}
+
+        <label className="schedule-showpast">
+          <input
+            type="checkbox"
+            checked={showPast}
+            onChange={(e) => setShowPast(e.target.checked)}
+          />
+          Show past events
+        </label>
       </div>
     </div>
   );
