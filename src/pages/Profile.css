@@ -67,9 +67,14 @@
   border-radius: 14px;
   border: 1px solid rgba(0,0,0,0.18);
   padding: 10px 12px;
-  background: rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.95);
   color: #111;
   outline: none;
+}
+
+.profile-card {
+  background: rgba(255, 236, 205, 0.92);
+  backdrop-filter: blur(6px);
 }
 
 .profile-textarea {
