@@ -26,7 +26,7 @@
   padding: 0 14px;
   background: var(--cniga-burnt-red) !important;
   color: #ffffff;
-  z-index: 20;
+  z-index: 50;
 }
 
 .app-header-logo {
@@ -298,21 +298,22 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  z-index: 60;
 }
 
 .profile-menu {
   position: absolute;
-  top: 44px;
   right: 0;
   min-width: 170px;
   padding: 8px;
   border-radius: 14px;
-
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 9999;
+  pointer-events: auto;
   background: rgba(255, 236, 205, 0.98);
   color: #111827;
-
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
-  z-index: 50;
 }
 
 .profile-menu-item {
@@ -345,4 +346,8 @@
 
 .profile-menu-item-danger:hover {
   background: rgba(153, 27, 27, 0.12);
+}
+
+.profile-menu * {
+  pointer-events: auto;
 }
