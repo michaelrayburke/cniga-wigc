@@ -1,14 +1,13 @@
 // src/pages/Profile.jsx
 import { useEffect, useMemo, useState } from "react";
 import "./Profile.css";
-
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import { ensureAttendeeProfile } from "../lib/profileHydration";
 import { QRCodeCanvas } from "qrcode.react";
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -16,75 +15,72 @@ export default function Profile() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
-  // Editable fields
-  const [email, setEmail] = useState("");
+  // Attendee profile fields (stored in public.attendees)
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
 
+  // Email (auth email) — updating this triggers Supabase’s email flow
+  const [email, setEmail] = useState(user?.email || "");
+  const [emailSaving, setEmailSaving] = useState(false);
+
   useEffect(() => {
-    let alive = true;
+    let isMounted = true;
 
     async function load() {
+      if (!user) return;
+
+      setLoading(true);
       setError("");
       setMessage("");
-      setLoading(true);
 
       try {
-        if (!user?.id) throw new Error("Not signed in.");
-
-        // Make sure attendee profile exists and is hydrated for legacy users
+        // Ensure a profile exists (hydrates from legacy if available)
         await ensureAttendeeProfile(user);
 
         const { data, error: fetchError } = await supabase
           .from("attendees")
-          .select("email, name, phone, bio, avatar_url")
+          .select("id,email,name,phone,bio,avatar_url,created_from")
           .eq("id", user.id)
           .single();
 
         if (fetchError) throw fetchError;
 
-        if (!alive) return;
+        if (!isMounted) return;
 
-        setEmail(data?.email || user.email || "");
         setName(data?.name || "");
         setPhone(data?.phone || "");
         setBio(data?.bio || "");
         setAvatarUrl(data?.avatar_url || "");
-      } catch (err) {
-        console.error(err);
-        if (!alive) return;
-        setError(err.message || "Failed to load profile.");
+        setEmail(user.email || data?.email || "");
+      } catch (e) {
+        console.error(e);
+        if (isMounted) setError(e.message || "Failed to load profile.");
       } finally {
-        if (!alive) return;
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
 
     load();
-
     return () => {
-      alive = false;
+      isMounted = false;
     };
-  }, [user?.id]);
+  }, [user]);
 
-  async function handleSave() {
+  async function handleSaveProfile() {
+    if (!user) return;
+
+    setSaving(true);
     setError("");
     setMessage("");
-    setSaving(true);
 
     try {
-      if (!user?.id) throw new Error("Not signed in.");
-
       const payload = {
-        // email is usually not editable here; we keep it synced
-        email: (email || user.email || "").trim(),
-        name: name.trim(),
-        phone: phone.trim(),
-        bio: bio.trim(),
-        avatar_url: avatarUrl.trim(),
-        updated_at: new Date().toISOString(),
+        name: name.trim() || null,
+        phone: phone.trim() || null,
+        bio: bio.trim() || null,
+        avatar_url: avatarUrl.trim() || null,
       };
 
       const { error: updateError } = await supabase
@@ -95,158 +91,218 @@ export default function Profile() {
       if (updateError) throw updateError;
 
       setMessage("Profile saved!");
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "Failed to save profile.");
+    } catch (e) {
+      console.error(e);
+      setError(e.message || "Failed to save profile.");
     } finally {
       setSaving(false);
     }
   }
 
-  // Build a vCard string for QR scanning
-  const vcardText = useMemo(() => {
-    const safeName = (name || "").trim();
-    const safePhone = (phone || "").trim();
-    const safeEmail = (email || user?.email || "").trim();
+  async function handleUpdateEmail() {
+    const nextEmail = (email || "").trim().toLowerCase();
+    if (!nextEmail) return;
 
-    // Minimal, widely compatible vCard
-    // (We can add organization/title later)
-    const lines = [
+    setEmailSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      // Supabase will email them to confirm the new address (depending on settings)
+      const { error: updateError } = await supabase.auth.updateUser({
+        email: nextEmail,
+      });
+
+      if (updateError) throw updateError;
+
+      setMessage(
+        "Email update requested. Please check your inbox to confirm the change."
+      );
+    } catch (e) {
+      console.error(e);
+      setError(e.message || "Failed to update email.");
+    } finally {
+      setEmailSaving(false);
+    }
+  }
+
+  const vcard = useMemo(() => {
+    const safeName = (name || "").trim();
+    const safeEmail = (user?.email || email || "").trim();
+    const safePhone = (phone || "").trim();
+
+    // vCard 3.0 is widely supported
+    // Note: keep it simple for scanning reliability
+    return [
       "BEGIN:VCARD",
       "VERSION:3.0",
-      safeName ? `FN:${escapeVCard(safeName)}` : "FN:WIGC Attendee",
-      safePhone ? `TEL;TYPE=CELL:${escapeVCard(safePhone)}` : null,
-      safeEmail ? `EMAIL:${escapeVCard(safeEmail)}` : null,
+      safeName ? `FN:${safeName}` : "FN:WIGC Attendee",
+      safeName ? `N:${safeName};;;;` : "N:Attendee;;;;",
+      safePhone ? `TEL;TYPE=CELL:${safePhone}` : "",
+      safeEmail ? `EMAIL:${safeEmail}` : "",
+      "ORG:CNIGA / WIGC",
       "END:VCARD",
-    ].filter(Boolean);
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }, [name, phone, user?.email, email]);
 
-    return lines.join("\n");
-  }, [name, phone, email, user?.email]);
+  function downloadVcf() {
+    const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
 
-  if (loading) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "wigc-contact.vcf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
+  if (!user) {
     return (
       <div className="profile-root">
-        <section className="profile-card">
+        <div className="profile-card">
           <h1>My Profile</h1>
-          <p className="profile-subtle">Loading your profile…</p>
-        </section>
+          <p>You’re not signed in.</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="profile-root">
-      <section className="profile-card">
-        <div className="profile-header-row">
-          <div className="profile-avatar">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="Your profile" />
-            ) : (
-              <div className="profile-avatar-placeholder">👤</div>
-            )}
-          </div>
+      <div className="profile-card">
+        <h1>My Profile</h1>
 
-          <div className="profile-header-text">
-            <h1>My Profile</h1>
-            <p className="profile-subtle">
-              Your profile is private to the app. You can update it any time.
-            </p>
-          </div>
-        </div>
+        {loading ? (
+          <p className="profile-subtle">Loading your attendee profile…</p>
+        ) : (
+          <>
+            {error && <p className="profile-error">{error}</p>}
+            {message && !error && <p className="profile-message">{message}</p>}
 
-        {error && <p className="profile-error">{error}</p>}
-        {message && !error && <p className="profile-message">{message}</p>}
+            <div className="profile-grid">
+              <div className="profile-avatar">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="Your avatar"
+                    className="profile-avatar-img"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <div className="profile-avatar-placeholder">No Photo</div>
+                )}
+              </div>
 
-        <div className="profile-form">
-          <label className="profile-label">
-            Email (used for login)
-            <input
-              className="profile-input"
-              value={email}
-              disabled
-              readOnly
-            />
-          </label>
+              <div className="profile-fields">
+                <label className="profile-label">
+                  Full Name
+                  <input
+                    className="profile-input"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your name"
+                  />
+                </label>
 
-          <label className="profile-label">
-            Name
-            <input
-              className="profile-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-            />
-          </label>
+                <label className="profile-label">
+                  Phone
+                  <input
+                    className="profile-input"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="(555) 555-5555"
+                    inputMode="tel"
+                  />
+                </label>
 
-          <label className="profile-label">
-            Phone
-            <input
-              className="profile-input"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="(555) 555-5555"
-              inputMode="tel"
-            />
-          </label>
+                <label className="profile-label">
+                  Avatar URL
+                  <input
+                    className="profile-input"
+                    value={avatarUrl}
+                    onChange={(e) => setAvatarUrl(e.target.value)}
+                    placeholder="https://…"
+                  />
+                </label>
+              </div>
+            </div>
 
-          <label className="profile-label">
-            Bio
-            <textarea
-              className="profile-textarea"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="Tell people a little about you…"
-              rows={5}
-            />
-          </label>
+            <label className="profile-label">
+              Bio
+              <textarea
+                className="profile-textarea"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="A short bio you’d like other attendees to see…"
+                rows={5}
+              />
+            </label>
 
-          <label className="profile-label">
-            Profile image URL (temporary)
-            <input
-              className="profile-input"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://…"
-            />
-            <span className="profile-help">
-              Later we’ll replace this with real uploads using Supabase Storage.
-            </span>
-          </label>
+            <div className="profile-actions">
+              <button
+                className="profile-button"
+                onClick={handleSaveProfile}
+                disabled={saving}
+              >
+                {saving ? "Saving…" : "Save Profile"}
+              </button>
 
-          <button
-            type="button"
-            className="profile-save-btn"
-            onClick={handleSave}
-            disabled={saving}
-          >
-            {saving ? "Saving…" : "Save changes"}
-          </button>
-        </div>
-      </section>
+              <button className="profile-button secondary" onClick={signOut}>
+                Log out
+              </button>
+            </div>
 
-      <section className="profile-card profile-card-qr">
-        <h2>My QR Code</h2>
-        <p className="profile-subtle">
-          Let someone scan this to add you as a contact.
-        </p>
+            <hr className="profile-divider" />
 
-        <div className="profile-qr-wrap">
-          <QRCodeCanvas value={vcardText} size={220} />
-        </div>
+            <div className="profile-email-block">
+              <h2 className="profile-section-title">Email</h2>
+              <p className="profile-subtle">
+                Changing your email may require confirmation via email.
+              </p>
 
-        <details className="profile-vcard-details">
-          <summary>Preview vCard data</summary>
-          <pre className="profile-vcard-pre">{vcardText}</pre>
-        </details>
-      </section>
+              <div className="profile-email-row">
+                <input
+                  className="profile-input"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                />
+                <button
+                  className="profile-button"
+                  onClick={handleUpdateEmail}
+                  disabled={emailSaving}
+                >
+                  {emailSaving ? "Updating…" : "Update Email"}
+                </button>
+              </div>
+            </div>
+
+            <hr className="profile-divider" />
+
+            <div className="profile-qr">
+              <h2 className="profile-section-title">My QR Contact Card</h2>
+              <p className="profile-subtle">
+                Let another attendee scan this to save your contact info.
+              </p>
+
+              <div className="profile-qr-box">
+                <QRCodeCanvas value={vcard} size={180} />
+              </div>
+
+              <button className="profile-button secondary" onClick={downloadVcf}>
+                Download vCard (.vcf)
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
-}
-
-function escapeVCard(input) {
-  return String(input)
-    .replace(/\\/g, "\\\\")
-    .replace(/\n/g, "\\n")
-    .replace(/,/g, "\\,")
-    .replace(/;/g, "\\;");
 }
