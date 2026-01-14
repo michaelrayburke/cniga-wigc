@@ -3,6 +3,25 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchScheduleData, fetchPresentersList } from "../api/wp";
 import "./Presenters.css";
 
+function normalizeAvatarUrl(value) {
+  if (!value) return "";
+  const v = String(value).trim();
+
+  // If Adalo imported JSON like {"url":"https://...","filename":"..."}
+  if (v.startsWith("{")) {
+    try {
+      const obj = JSON.parse(v);
+      if (obj?.url) return obj.url;
+    } catch {
+      // ignore
+    }
+  }
+
+  // Otherwise assume it's already a URL
+  return v;
+}
+
+
 export default function Presenters() {
   const [loading, setLoading] = useState(true);
   const [presenters, setPresenters] = useState([]);
