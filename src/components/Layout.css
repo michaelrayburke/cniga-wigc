@@ -7,143 +7,6 @@
   --cniga-navy: #050815;
 }
 
-/* Shell: header + main + bottom nav */
-.app-shell {
-  min-height: 100vh;
-  background-color: #000;
-  color: #f9fafb;
-}
-
-/* Top bar */
-.app-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
-  background: var(--cniga-burnt-red) !important;
-  color: #ffffff;
-  z-index: 50;
-}
-
-.app-header-logo {
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin-right: 10px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.app-header-logo img {
-  height: 34px;
-  width: auto;
-}
-
-.app-header-title {
-  flex: 1;
-  text-align: center;
-  font-family: "Tiempos Headline", "Georgia", serif;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.8rem;
-}
-
-.app-header-profile {
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin-left: 10px;
-  cursor: pointer;
-}
-
-.app-header-profile-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  font-size: 0.9rem;
-}
-
-/* Main content */
-.app-main {
-  padding-top: 60px; /* header height */
-  padding-bottom: 64px; /* bottom nav height */
-  min-height: 100vh;
-  background-image: url("../assets/bg1.jpg");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-}
-
-.app-main-inner {
-  margin: 65px auto 0 !important;
-  padding: 16px 16px 24px;
-}
-
-/* Bottom nav */
-.app-bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
-  background: var(--cniga-burnt-red);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  z-index: 20;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.4);
-}
-
-.app-nav-btn {
-  border: none;
-  background: transparent;
-  color: #ffeccd;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 0;
-  opacity: 0.85;
-}
-
-.app-nav-btn-active {
-  color: #fff;
-  background: var(--cniga-burnt-red);
-  opacity: 1;
-}
-
-.app-nav-btn:active {
-  transform: translateY(1px);
-}
-
-/* Small tweaks for larger screens */
-@media (min-width: 768px) {
-  .app-header {
-    height: 64px;
-    padding-inline: 24px;
-  }
-
-  .app-main {
-    padding-top: 64px;
-    padding-bottom: 72px;
-  }
-
-  .app-main-inner {
-    padding-inline: 24px;
-  }
-}
-
 
 /* === App background & layout overrides (ensure full-screen bg image, no side bars) === */
 
@@ -183,6 +46,11 @@
   background: var(--cniga-burnt-red);
   color: #ffeccd;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
 }
 
 .app-header-logo {
@@ -233,6 +101,7 @@
   padding-bottom: 72px;
   position: relative;
   z-index: 1;
+  background: transparent;
 }
 
 .app-main-inner {
@@ -256,6 +125,7 @@
   height: 100%;
   display: flex;
   align-items: stretch;
+  z-index: 40;
 }
 
 /* Nav buttons wired to existing classes */
