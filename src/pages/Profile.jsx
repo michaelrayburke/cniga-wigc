@@ -6,25 +6,6 @@ import { useAuth } from "../context/AuthContext";
 import { ensureAttendeeProfile } from "../lib/profileHydration";
 import { QRCodeCanvas } from "qrcode.react";
 
-function normalizeAvatarUrl(value) {
-  if (!value) return "";
-  const v = String(value).trim();
-
-  // If Adalo imported JSON like {"url":"https://...","filename":"..."}
-  if (v.startsWith("{")) {
-    try {
-      const obj = JSON.parse(v);
-      if (obj?.url) return obj.url;
-    } catch {
-      // ignore
-    }
-  }
-
-  // Otherwise assume it's already a URL
-  return v;
-}
-
-
 export default function Profile() {
   const { user, signOut } = useAuth();
 
@@ -38,11 +19,97 @@ export default function Profile() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [bio, setBio] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
+
+  // Avatar stored as STORAGE PATH in attendees.avatar_url (e.g. "<userId>/123.jpg")
+  const [avatarPath, setAvatarPath] = useState("");
+  const [avatarPublicUrl, setAvatarPublicUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   // Email (auth email) — updating this triggers Supabase’s email flow
   const [email, setEmail] = useState(user?.email || "");
   const [emailSaving, setEmailSaving] = useState(false);
+
+  function publicAvatarUrl(path) {
+    if (!path) return "";
+    const { data } = supabase.storage.from("uploads-public").getPublicUrl(path);
+    return data?.publicUrl || "";
+  }
+
+  async function handleAvatarSelected(e) {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please choose an image file.");
+      return;
+    }
+
+    setUploading(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${user.id}/${Date.now()}.${ext}`;
+
+      const { error: upErr } = await supabase.storage
+        .from("uploads-public")
+        .upload(path, file, {
+          upsert: true,
+          contentType: file.type,
+        });
+
+      if (upErr) throw upErr;
+
+      const { error: dbErr } = await supabase
+        .from("attendees")
+        .update({ avatar_url: path })
+        .eq("id", user.id);
+
+      if (dbErr) throw dbErr;
+
+      setAvatarPath(path);
+      setAvatarPublicUrl(publicAvatarUrl(path));
+      setMessage("Photo uploaded!");
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Upload failed.");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  async function handleRemoveAvatar() {
+    if (!user) return;
+
+    setUploading(true);
+    setError("");
+    setMessage("");
+
+    try {
+      // Optional delete file (works if bucket/policy allows it)
+      if (avatarPath) {
+        await supabase.storage.from("uploads-public").remove([avatarPath]);
+      }
+
+      const { error: dbErr } = await supabase
+        .from("attendees")
+        .update({ avatar_url: null })
+        .eq("id", user.id);
+
+      if (dbErr) throw dbErr;
+
+      setAvatarPath("");
+      setAvatarPublicUrl("");
+      setMessage("Photo removed.");
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Remove failed.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   useEffect(() => {
     let isMounted = true;
@@ -65,13 +132,17 @@ export default function Profile() {
           .single();
 
         if (fetchError) throw fetchError;
-
         if (!isMounted) return;
 
         setName(data?.name || "");
         setPhone(data?.phone || "");
         setBio(data?.bio || "");
-        setAvatarUrl(normalizeAvatarUrl(data?.avatar_url || ""));
+
+        // ✅ avatar_url is now a STORAGE PATH, not a URL
+        const path = data?.avatar_url || "";
+        setAvatarPath(path);
+        setAvatarPublicUrl(publicAvatarUrl(path));
+
         setEmail(user.email || data?.email || "");
       } catch (e) {
         console.error(e);
@@ -99,7 +170,7 @@ export default function Profile() {
         name: name.trim() || null,
         phone: phone.trim() || null,
         bio: bio.trim() || null,
-        avatar_url: normalizeAvatarUrl(avatarUrl) || null,
+        // ✅ Do NOT touch avatar_url here — upload handles it
       };
 
       const { error: updateError } = await supabase
@@ -127,7 +198,6 @@ export default function Profile() {
     setMessage("");
 
     try {
-      // Supabase will email them to confirm the new address (depending on settings)
       const { error: updateError } = await supabase.auth.updateUser({
         email: nextEmail,
       });
@@ -150,8 +220,6 @@ export default function Profile() {
     const safeEmail = (user?.email || email || "").trim();
     const safePhone = (phone || "").trim();
 
-    // vCard 3.0 is widely supported
-    // Note: keep it simple for scanning reliability
     return [
       "BEGIN:VCARD",
       "VERSION:3.0",
@@ -182,9 +250,6 @@ export default function Profile() {
 
   if (!user) {
     return (
-
-
-      
       <div className="profile-root">
         <div className="profile-card">
           <h1>My Profile</h1>
@@ -208,18 +273,40 @@ export default function Profile() {
 
             <div className="profile-grid">
               <div className="profile-avatar">
-                {avatarUrl ? (
+                {avatarPublicUrl ? (
                   <img
-                    src={avatarUrl}
-                    alt="Your avatar"
+                    src={avatarPublicUrl}
+                    alt="Your photo"
                     className="profile-avatar-img"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
+                    onError={() => setAvatarPublicUrl("")}
                   />
                 ) : (
                   <div className="profile-avatar-placeholder">No Photo</div>
                 )}
+
+                <div className="profile-avatar-actions">
+                  <label className="profile-upload-btn">
+                    {uploading ? "Uploading…" : "Upload photo"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarSelected}
+                      disabled={uploading}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+
+                  {!!avatarPath && (
+                    <button
+                      type="button"
+                      className="profile-button secondary"
+                      onClick={handleRemoveAvatar}
+                      disabled={uploading}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="profile-fields">
@@ -241,16 +328,6 @@ export default function Profile() {
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="(555) 555-5555"
                     inputMode="tel"
-                  />
-                </label>
-
-                <label className="profile-label">
-                  Avatar URL
-                  <input
-                    className="profile-input"
-                    value={avatarUrl}
-                    onChange={(e) => setAvatarUrl(e.target.value)}
-                    placeholder="https://…"
                   />
                 </label>
               </div>
