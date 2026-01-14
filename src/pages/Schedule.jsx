@@ -24,21 +24,34 @@ export default function Schedule() {
   const [favoritesError, setFavoritesError] = useState("");
 
   // 1) Load schedule from WP
-  useEffect(() => {
-    (async () => {
-      try {
-        const { sessions, socials, allEvents } = await fetchScheduleData();
-        setSessions(sessions);
-        setSocials(socials);
-        setAllEvents(allEvents);
-      } catch (err) {
-        console.error(err);
-        setError("Unable to load schedule.");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+ useEffect(() => {
+  (async () => {
+    try {
+      const result = await fetchScheduleData();
+
+      // SAFETY DEFAULTS (prevents "blank screen" crashes)
+      const nextSessions = Array.isArray(result?.sessions) ? result.sessions : [];
+      const nextSocials = Array.isArray(result?.socials) ? result.socials : [];
+
+      // IMPORTANT: some versions return "events" instead of "allEvents"
+      const nextAllEvents = Array.isArray(result?.allEvents)
+        ? result.allEvents
+        : Array.isArray(result?.events)
+        ? result.events
+        : [];
+
+      setSessions(nextSessions);
+      setSocials(nextSocials);
+      setAllEvents(nextAllEvents);
+    } catch (err) {
+      console.error(err);
+      setError("Unable to load schedule.");
+    } finally {
+      setLoading(false);
+    }
+  })();
+}, []);
+
 
   // 2) Load favorites from Supabase (and migrate localStorage once)
   useEffect(() => {
