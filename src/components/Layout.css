@@ -292,3 +292,57 @@
     padding-inline: 24px;
   }
 }
+
+/* Profile dropdown menu */
+.app-header-profile-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.profile-menu {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  min-width: 170px;
+  padding: 8px;
+  border-radius: 14px;
+
+  background: rgba(255, 236, 205, 0.98);
+  color: #111827;
+
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  z-index: 50;
+}
+
+.profile-menu-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.profile-menu-item:hover {
+  background: rgba(248, 108, 79, 0.18);
+}
+
+.profile-menu-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.15);
+  margin: 6px 6px;
+}
+
+.profile-menu-item-danger {
+  color: #991b1b;
+}
+
+.profile-menu-item-danger:hover {
+  background: rgba(153, 27, 27, 0.12);
+}
