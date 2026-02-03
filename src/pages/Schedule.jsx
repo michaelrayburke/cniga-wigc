@@ -49,20 +49,30 @@ export default function Schedule() {
       }
     })();
   }, []);
+  function getDisplayTrack(e) {
+  // Hide for socials (wigc-event-type = social)
+  if (e?.kinds?.includes("social") || e?.kinds?.includes("socials")) return "";
+
+  const t = typeof e?.track === "string" ? e.track.trim() : "";
+  if (!t || t === "-") return "";
+
+  return t; // just the name, no "Track:"
+}
 
   // Track dropdown options (from sessions) — MUST be above early returns
-  const allTracks = useMemo(() => {
-    const list = Array.isArray(sessions) ? sessions : [];
+ const allTracks = useMemo(() => {
+  const list = Array.isArray(sessions) ? sessions : [];
 
-    return Array.from(
-      new Set(
-        list
-          .map((e) => e?.track)
-          .filter((t) => typeof t === "string" && t.trim())
-          .map((t) => t.trim())
-      )
-    ).sort((a, b) => a.localeCompare(b));
-  }, [sessions]);
+  return Array.from(
+    new Set(
+      list
+        .map((e) => getDisplayTrack(e))
+        .filter((t) => typeof t === "string" && t.trim())
+    )
+  ).sort((a, b) => a.localeCompare(b));
+}, [sessions]);
+
+
 
   // Helper: parse "11:10 am" on a given dayKey ("2025-02-27") into a Date (local time)
   function parseEventDateTime(ev, timeStr) {
@@ -174,7 +184,7 @@ export default function Schedule() {
       mounted = false;
     };
   }, [user]);
-
+  
   async function toggleStar(eventId) {
     if (!user) return;
 
@@ -237,30 +247,33 @@ export default function Schedule() {
       });
 
   // Apply search + track filter (after time filter)
-  const filtered = timeFilteredBase.filter((e) => {
-    // Track filter allowed for sessions OR mine (mine might include sessions)
-    if ((view === "sessions" || view === "mine") && trackFilter !== "all") {
-      if (!e.track || e.track.trim() !== trackFilter) return false;
-    }
+const filtered = timeFilteredBase.filter((e) => {
+  const displayTrack = getDisplayTrack(e);
 
-    if (!search.trim()) return true;
+  // Track filter allowed for sessions OR mine (mine might include sessions)
+  if ((view === "sessions" || view === "mine") && trackFilter !== "all") {
+    if (displayTrack !== trackFilter) return false;
+  }
 
-    const q = search.toLowerCase();
-    const haystack = [
-      e.title,
-      e.track,
-      e.room,
-      e.date,
-      e.contentHtml,
-      ...(e.speakers || []).map((sp) => sp?.name),
-      e.moderator?.name,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
+  if (!search.trim()) return true;
 
-    return haystack.includes(q);
-  });
+  const q = search.toLowerCase();
+  const haystack = [
+    e.title,
+    displayTrack,
+    e.room,
+    e.date,
+    e.contentHtml,
+    ...(e.speakers || []).map((sp) => sp?.name),
+    e.moderator?.name,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(q);
+});
+
 
   if (!filtered.length) {
     return (
@@ -335,41 +348,41 @@ export default function Schedule() {
           <h2 className="schedule-day-heading">{day.label}</h2>
           <div className="schedule-list">
             {day.events.map((e) => {
-              const id = String(e.id);
-              const starred = starredIds.includes(id);
-
-              return (
-                <article key={id} className="schedule-card">
-                  <header className="schedule-card-header">
-                    <h3
-                      className="schedule-title"
-                      dangerouslySetInnerHTML={{ __html: e.title }}
-                    />
-                    <button
-                      type="button"
-                      className={
-                        "schedule-star-btn" +
-                        (starred ? " schedule-star-btn-active" : "")
-                      }
-                      onClick={() => toggleStar(id)}
-                      aria-pressed={starred}
-                      aria-label={
-                        starred
-                          ? "Remove from my schedule"
-                          : "Add to my schedule"
-                      }
-                      disabled={favoritesLoading}
-                      title={
-                        favoritesLoading
-                          ? "Loading…"
-                          : starred
-                          ? "Remove"
-                          : "Add"
-                      }
-                    >
-                      ★
-                    </button>
-                  </header>
+                const id = String(e.id);
+                const starred = starredIds.includes(id);
+                const displayTrack = getDisplayTrack(e);
+                return (
+                  <article key={id} className="schedule-card">
+                    <header className="schedule-card-header">
+                      <h3
+                        className="schedule-title"
+                        dangerouslySetInnerHTML={{ __html: e.title }}
+                      />
+                      <button
+                        type="button"
+                        className={
+                          "schedule-star-btn" +
+                          (starred ? " schedule-star-btn-active" : "")
+                        }
+                        onClick={() => toggleStar(id)}
+                        aria-pressed={starred}
+                        aria-label={
+                          starred
+                            ? "Remove from my schedule"
+                            : "Add to my schedule"
+                        }
+                        disabled={favoritesLoading}
+                        title={
+                          favoritesLoading
+                            ? "Loading…"
+                            : starred
+                            ? "Remove"
+                            : "Add"
+                        }
+                      >
+                        ★
+                      </button>
+                    </header>
 
                   <div className="schedule-meta">
                     {(e.startTime || e.endTime || e.room) && (
@@ -389,35 +402,31 @@ export default function Schedule() {
                       </p>
                     )}
 
-                    {(e.track ||
-                      (e.speakers && e.speakers.length) ||
-                      e.moderator) && (
-                      <p>
-                        {e.track && <span>Track: {e.track}</span>}
-                        {e.track && (e.speakers?.length || e.moderator) && " • "}
-                        {e.speakers && e.speakers.length > 0 && (
-                          <span>
-                            Speakers:{" "}
-                            {e.speakers
-                              .map(
-                                (sp) =>
-                                  sp?.name ||
-                                  [sp?.firstName, sp?.lastName]
-                                    .filter(Boolean)
-                                    .join(" ")
-                              )
-                              .filter(Boolean)
-                              .join(", ")}
-                          </span>
-                        )}
-                        {e.moderator && (
-                          <>
-                            {" • "}
-                            <span>Moderator: {e.moderator.name}</span>
-                          </>
-                        )}
-                      </p>
-                    )}
+                    {(displayTrack || (e.speakers && e.speakers.length) || e.moderator) && (
+  <p>
+    {displayTrack && <span>{displayTrack}</span>}
+    {displayTrack && (e.speakers?.length || e.moderator) && " • "}
+    {e.speakers && e.speakers.length > 0 && (
+      <span>
+        Speakers:{" "}
+        {e.speakers
+          .map(
+            (sp) =>
+              sp?.name ||
+              [sp?.firstName, sp?.lastName].filter(Boolean).join(" ")
+          )
+          .filter(Boolean)
+          .join(", ")}
+      </span>
+    )}
+    {e.moderator && (
+      <>
+        {" • "}
+        <span>Moderator: {e.moderator.name}</span>
+      </>
+    )}
+  </p>
+)}
                   </div>
 
                   {e.contentHtml && (
