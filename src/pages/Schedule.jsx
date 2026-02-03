@@ -58,6 +58,43 @@ export default function Schedule() {
 
   return t; // just the name, no "Track:"
 }
+function normalizeToArray(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+
+  // array-like object: {0:..., 1:...}
+  if (typeof value === "object") {
+    if (Array.isArray(value.data)) return value.data;
+    const keys = Object.keys(value);
+    const numericKeys = keys.filter((k) => String(+k) === k).sort((a, b) => +a - +b);
+    if (numericKeys.length) return numericKeys.map((k) => value[k]);
+  }
+
+  // single object/string -> treat as 1-item list
+  return [value];
+}
+
+function getPersonName(p) {
+  if (!p) return "";
+  if (typeof p === "string") return p.trim();
+
+  if (typeof p === "object") {
+    const name =
+      p.name ||
+      p.post_title ||      // WP post object title
+      p.title ||
+      p.display_name ||
+      [p.firstName, p.lastName].filter(Boolean).join(" ");
+
+    return typeof name === "string" ? name.trim() : "";
+  }
+
+  return "";
+}
+
+function getPeopleList(value) {
+  return normalizeToArray(value).map(getPersonName).filter(Boolean).join(", ");
+}
 
   // Track dropdown options (from sessions) — MUST be above early returns
  const allTracks = useMemo(() => {
@@ -351,6 +388,9 @@ const filtered = timeFilteredBase.filter((e) => {
                 const id = String(e.id);
                 const starred = starredIds.includes(id);
                 const displayTrack = getDisplayTrack(e);
+                const speakerNames = getPeopleList(e.speakers);
+                const moderatorName = getPeopleList(e.moderator); // works if moderator is single or array
+
                 return (
                   <article key={id} className="schedule-card">
                     <header className="schedule-card-header">
@@ -416,29 +456,22 @@ const filtered = timeFilteredBase.filter((e) => {
                       dangerouslySetInnerHTML={{ __html: e.contentHtml }}
                     />
                   )}
-                    {(e.moderator || (e.speakers && e.speakers.length > 0)) && (
+{(speakerNames || moderatorName) && (
   <div className="schedule-people">
-    {e.moderator && (
+    {speakerNames && (
       <p className="schedule-person">
-        <strong>Moderator:</strong> {e.moderator.name}
+        <strong>Speakers:</strong> {speakerNames}
       </p>
     )}
 
-    {e.speakers && e.speakers.length > 0 && (
+    {moderatorName && (
       <p className="schedule-person">
-        <strong>Speakers:</strong>{" "}
-        {e.speakers
-          .map(
-            (sp) =>
-              sp?.name ||
-              [sp?.firstName, sp?.lastName].filter(Boolean).join(" ")
-          )
-          .filter(Boolean)
-          .join(", ")}
+        <strong>Moderator:</strong> {moderatorName}
       </p>
     )}
   </div>
 )}
+
 
                 </article>
               );
