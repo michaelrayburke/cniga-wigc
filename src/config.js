@@ -10,7 +10,6 @@ export const SPONSOR_GROUPS = [
   { slug: "wigc-sponsors-bronze", label: "Bronze Sponsors" },
   { slug: "wigc-room-key-sponsor", label: "Hotel Card Key Sponsor" },
   { slug: "wigc-sponsors-awards-luncheon", label: "Award Luncheon Sponsors" },
-  { slug: "wigc-trade-show-luncheon-sponsor", label: "Trade Show Luncheon Sponsors" },
   { slug: "wigc-welcome-reception", label: "Welcome Reception Sponsors" },
   { slug: "wigc-sponsors-happy-hour", label: "Happy Hour Sponsors" },
   { slug: "wigc-panel-sponsor", label: "Panel Sponsors" },
@@ -20,7 +19,11 @@ export const SPONSOR_GROUPS = [
   { slug: "wigc-bowling-sponsors-sapphire", label: "Bowling Sapphire Sponsors" },
   { slug: "wigc-bowling-sponsors-opal", label: "Bowling Opal Sponsors" },
   { slug: "wigc-bowling-sponsors-jade", label: "Bowling Jade Sponsors" },
+  { slug: "wigc-bowling-sponsorr-turquoise", label: "Bowling Turquoise Sponsor" },
+  { slug: "wigc-bowling-sponsors-lane-sponsor", label: "Lane Sponsor" },
+  { slug: "wigc-afterparty-sponsors", label: "After Party Sponsors" },
 ];
+
 
 // CPT REST slugs where actual sponsor records live
 export const SPONSOR_TYPES = ["casinos", "tribal_offices", "associate_members"];
