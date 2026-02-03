@@ -237,8 +237,18 @@ async function fetchAllEvents() {
 
     // Speakers / moderator are relationships to presenter CPT
     const speakerIds = Array.isArray(acf.speakers) ? acf.speakers : [];
+    const moderatorRaw = acf.moderator;
+
+    // Support: number ID, string ID, or Post Object
     const moderatorId =
-      typeof acf.moderator === "number" ? acf.moderator : null;
+        typeof moderatorRaw === "number"
+        ? moderatorRaw
+        : typeof moderatorRaw === "string"
+        ? parseInt(moderatorRaw, 10) || null
+        : moderatorRaw && typeof moderatorRaw === "object"
+        ? (moderatorRaw.ID || moderatorRaw.id || null)
+        : null;
+
 
     // Description field can be either session-description or event_description
     const descriptionHtml =
