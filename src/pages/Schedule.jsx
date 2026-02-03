@@ -405,26 +405,6 @@ const filtered = timeFilteredBase.filter((e) => {
                     {(displayTrack || (e.speakers && e.speakers.length) || e.moderator) && (
   <p>
     {displayTrack && <span>{displayTrack}</span>}
-    {displayTrack && (e.speakers?.length || e.moderator) && " • "}
-    {e.speakers && e.speakers.length > 0 && (
-      <span>
-        Speakers:{" "}
-        {e.speakers
-          .map(
-            (sp) =>
-              sp?.name ||
-              [sp?.firstName, sp?.lastName].filter(Boolean).join(" ")
-          )
-          .filter(Boolean)
-          .join(", ")}
-      </span>
-    )}
-    {e.moderator && (
-      <>
-        {" • "}
-        <span>Moderator: {e.moderator.name}</span>
-      </>
-    )}
   </p>
 )}
                   </div>
@@ -435,6 +415,30 @@ const filtered = timeFilteredBase.filter((e) => {
                       dangerouslySetInnerHTML={{ __html: e.contentHtml }}
                     />
                   )}
+                    {(e.moderator || (e.speakers && e.speakers.length > 0)) && (
+  <div className="schedule-people">
+    {e.moderator && (
+      <p className="schedule-person">
+        <strong>Moderator:</strong> {e.moderator.name}
+      </p>
+    )}
+
+    {e.speakers && e.speakers.length > 0 && (
+      <p className="schedule-person">
+        <strong>Speakers:</strong>{" "}
+        {e.speakers
+          .map(
+            (sp) =>
+              sp?.name ||
+              [sp?.firstName, sp?.lastName].filter(Boolean).join(" ")
+          )
+          .filter(Boolean)
+          .join(", ")}
+      </p>
+    )}
+  </div>
+)}
+
                 </article>
               );
             })}
