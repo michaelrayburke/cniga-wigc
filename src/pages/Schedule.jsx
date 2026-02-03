@@ -402,11 +402,12 @@ const filtered = timeFilteredBase.filter((e) => {
                       </p>
                     )}
 
-                    {(displayTrack || (e.speakers && e.speakers.length) || e.moderator) && (
-  <p>
-    {displayTrack && <span>{displayTrack}</span>}
-  </p>
-)}
+                 {displayTrack && (
+                  <p>
+                   <span>{displayTrack}</span>
+                  </p>  
+                  )}
+
                   </div>
 
                   {e.contentHtml && (
