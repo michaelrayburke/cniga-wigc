@@ -155,6 +155,16 @@
   color: #111827;
 }
 
+/* Schedule People */
+.schedule-people {
+  margin-top: 10px;
+}
+
+.schedule-person {
+  margin: 6px 0 0 0;
+}
+
+
 /* Status / error text (shared) */
 .app-status-text {
   text-align: center;
