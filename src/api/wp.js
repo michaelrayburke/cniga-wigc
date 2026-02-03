@@ -204,10 +204,36 @@ async function fetchAllEvents() {
       }
     }
 
-    // Fallback: ACF "track" text field if taxonomy not used
-    if (!trackName && acf.track) {
-      trackName = acf.track;
+  // Fallback: ACF track (supports text field OR select dropdown return formats)
+  if (!trackName) {
+    const rawTrack =
+      acf.track ??
+      acf["event-track"] ??
+      acf.event_track ??
+      acf["seminar-track"] ??
+      acf.seminar_track ??
+      null;
+
+    if (rawTrack) {
+      if (typeof rawTrack === "string") {
+        trackName = rawTrack;
+      } else if (Array.isArray(rawTrack)) {
+        trackName = rawTrack.filter(Boolean).join(", ");
+      } else if (typeof rawTrack === "object") {
+        // ACF Select can return { value, label } when set to "Both (Array)"
+        trackName =
+          rawTrack.label ??
+          rawTrack.value ??
+          rawTrack.name ??
+          "";
+      }
+
+      if (trackName) {
+        trackName = decodeHtmlEntities(String(trackName)).trim();
+      }
     }
+  }
+
 
     // Speakers / moderator are relationships to presenter CPT
     const speakerIds = Array.isArray(acf.speakers) ? acf.speakers : [];
