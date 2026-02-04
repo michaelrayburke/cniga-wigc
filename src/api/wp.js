@@ -62,10 +62,8 @@ async function fetchSingleSponsor({ id, type }) {
   return {
     id: data.id,
     type,
-    // Decode HTML entities here so AT&#038;T → AT&T
     name: decodeHtmlEntities(data.title?.rendered || ""),
     logoUrl: featuredLogo || acfLogo,
-    // Prefer ACF website, then top-level website field
     website: data.acf?.website || data.website || null,
   };
 }
@@ -79,7 +77,6 @@ function normalizeRelItem(raw) {
     };
   }
   if (typeof raw === "number") {
-    // Relationship returning IDs only — you'd need extra info to know the CPT
     return { id: raw, type: null };
   }
   return null;
@@ -99,9 +96,7 @@ export async function fetchSponsorGroups() {
     }
 
     const rel = post?.acf?.select_sponsors;
-    if (!post || !Array.isArray(rel) || !rel.length) {
-      continue;
-    }
+    if (!post || !Array.isArray(rel) || !rel.length) continue;
 
     const normalized = rel
       .map(normalizeRelItem)
@@ -185,15 +180,15 @@ async function fetchAllEvents() {
     // Taxonomy terms: event type, room, maybe track
     let roomName = null;
     let trackName = null;
-    const kinds = []; // e.g. ['session'] or ['social']
+    const kinds = [];
 
     const termGroups = item._embedded?.["wp:term"] || [];
     for (const group of termGroups) {
       for (const term of group) {
         if (!term || !term.taxonomy) continue;
 
-        if (term.taxonomy === "wigc-event-type") {
-          if (term.slug) kinds.push(term.slug); // 'session', 'social', etc.
+        if (term.taxonomy === "wigc-event-type" && term.slug) {
+          kinds.push(term.slug);
         }
         if (term.taxonomy === "room" && !roomName) {
           roomName = term.name;
@@ -204,58 +199,83 @@ async function fetchAllEvents() {
       }
     }
 
-  // Fallback: ACF track (supports text field OR select dropdown return formats)
-  if (!trackName) {
-    const rawTrack =
-      acf.track ??
-      acf["event-track"] ??
-      acf.event_track ??
-      acf["seminar-track"] ??
-      acf.seminar_track ??
-      null;
+    // Fallback: ACF track (supports text field OR select dropdown return formats)
+    if (!trackName) {
+      const rawTrack =
+        acf.track ??
+        acf["event-track"] ??
+        acf.event_track ??
+        acf["seminar-track"] ??
+        acf.seminar_track ??
+        null;
 
-    if (rawTrack) {
-      if (typeof rawTrack === "string") {
-        trackName = rawTrack;
-      } else if (Array.isArray(rawTrack)) {
-        trackName = rawTrack.filter(Boolean).join(", ");
-      } else if (typeof rawTrack === "object") {
-        // ACF Select can return { value, label } when set to "Both (Array)"
-        trackName =
-          rawTrack.label ??
-          rawTrack.value ??
-          rawTrack.name ??
-          "";
-      }
+      if (rawTrack) {
+        if (typeof rawTrack === "string") {
+          trackName = rawTrack;
+        } else if (Array.isArray(rawTrack)) {
+          trackName = rawTrack.filter(Boolean).join(", ");
+        } else if (typeof rawTrack === "object") {
+          trackName = rawTrack.label ?? rawTrack.value ?? rawTrack.name ?? "";
+        }
 
-      if (trackName) {
-        trackName = decodeHtmlEntities(String(trackName)).trim();
+        if (trackName) {
+          trackName = decodeHtmlEntities(String(trackName)).trim();
+        }
       }
     }
-  }
 
+    // Speakers / moderator are relationships to presenter CPT
+    // NOTE: speakers is a relationship field returning IDs
+    const speakerIds = Array.isArray(acf.speakers)
+      ? acf.speakers
+          .map((x) => (typeof x === "string" ? parseInt(x, 10) : x))
+          .filter(Boolean)
+      : [];
 
-   // Speakers / moderator are relationships to presenter CPT
-const speakerIds = Array.isArray(acf.speakers) ? acf.speakers : [];
+    // NOTE: moderator relationship may be: [id], id, "id", Post Object, or [Post Object]
+    const moderatorArr = Array.isArray(acf.moderator)
+      ? acf.moderator
+      : acf.moderator
+      ? [acf.moderator]
+      : [];
 
-// ACF relationship returns an array (even if max = 1)
-const moderatorArr = Array.isArray(acf.moderator)
-  ? acf.moderator
-  : acf.moderator
-  ? [acf.moderator]
-  : [];
+    const moderatorRaw = moderatorArr[0] ?? null;
 
-const moderatorRaw = moderatorArr[0] ?? null;
+    const moderatorId =
+      typeof moderatorRaw === "number"
+        ? moderatorRaw
+        : typeof moderatorRaw === "string"
+        ? parseInt(moderatorRaw, 10) || null
+        : moderatorRaw && typeof moderatorRaw === "object"
+        ? moderatorRaw.ID || moderatorRaw.id || null
+        : null;
 
-// Support: number ID, string ID, or Post Object
-const moderatorId =
-  typeof moderatorRaw === "number"
-    ? moderatorRaw
-    : typeof moderatorRaw === "string"
-    ? parseInt(moderatorRaw, 10) || null
-    : moderatorRaw && typeof moderatorRaw === "object"
-    ? (moderatorRaw.ID || moderatorRaw.id || null)
-    : null;
+    // Description field can be either session-description or event_description
+    const descriptionHtml =
+      acf["session-description"] ||
+      acf.session_description ||
+      acf.event_description ||
+      acf["event-description"] ||
+      item.content?.rendered ||
+      "";
+
+    return {
+      id: item.id,
+      title: decodeHtmlEntities(item.title?.rendered || ""),
+      date: dateLabel,
+      startTime: acf["event-time-start"] || null,
+      endTime: acf["event-time-end"] || null,
+      room: roomName,
+      track: trackName,
+      speakerIds,
+      moderatorId,
+      contentHtml: descriptionHtml,
+      sortKey,
+      dayKey,
+      kinds,
+    };
+  });
+}
 
 // Public: fetch schedule and split into sessions / socials / all (deduped)
 export async function fetchScheduleData() {
@@ -275,16 +295,12 @@ export async function fetchScheduleData() {
 
   const attachPeople = (ev) => ({
     ...ev,
-    speakers: (ev.speakerIds || [])
-      .map((id) => presenters[id])
-      .filter(Boolean),
+    speakers: (ev.speakerIds || []).map((id) => presenters[id]).filter(Boolean),
     moderator: ev.moderatorId ? presenters[ev.moderatorId] || null : null,
   });
 
-  // Enrich all events with speaker / moderator objects
   const allEvents = rawEvents.map(attachPeople);
 
-  // Use taxonomy-kinds to classify
   const sessions = allEvents.filter((ev) =>
     ev.kinds?.includes(EVENT_TYPES.sessions)
   );
@@ -311,7 +327,6 @@ export async function fetchPresentersList() {
       org: acf.presenterorg || "",
       bioHtml: acf.bio || "",
       photo: acf.presenterphoto || null,
-      // keep sessions_speaker raw IDs in case we want them later
       sessionsSpeaker: Array.isArray(acf.sessions_speaker)
         ? acf.sessions_speaker
         : [],
