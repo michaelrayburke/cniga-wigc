@@ -74,15 +74,16 @@ function normalizeToArray(value) {
   return [value];
 }
 
-function getPersonName(p) {
+function getPersonName(p) {  
   if (!p) return "";
+
   if (typeof p === "string") return p.trim();
 
   if (typeof p === "object") {
     const name =
       p.name ||
-      p.post_title ||      // WP post object title
-      p.title ||
+      p.post_title ||
+      (p.title && typeof p.title === "object" ? p.title.rendered : p.title) ||
       p.display_name ||
       [p.firstName, p.lastName].filter(Boolean).join(" ");
 
@@ -91,6 +92,7 @@ function getPersonName(p) {
 
   return "";
 }
+  
 
 function getPeopleList(value) {
   return normalizeToArray(value).map(getPersonName).filter(Boolean).join(", ");
@@ -458,19 +460,20 @@ const filtered = timeFilteredBase.filter((e) => {
                   )}
 {(speakerNames || moderatorName) && (
   <div className="schedule-people">
-    {speakerNames && (
+    {moderatorName && (
       <p className="schedule-person">
-        <strong>Speakers:</strong> {speakerNames}
+        <span className="schedule-person-label">Moderator:</span> {moderatorName}
       </p>
     )}
 
-    {moderatorName && (
+    {speakerNames && (
       <p className="schedule-person">
-        <strong>Moderator:</strong> {moderatorName}
+        <span className="schedule-person-label">Speakers:</span> {speakerNames}
       </p>
     )}
   </div>
 )}
+
 
 
                 </article>
