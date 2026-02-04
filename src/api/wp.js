@@ -235,47 +235,27 @@ async function fetchAllEvents() {
   }
 
 
-    // Speakers / moderator are relationships to presenter CPT
-    const speakerIds = Array.isArray(acf.speakers) ? acf.speakers : [];
-    const moderatorRaw = acf.moderator;
+   // Speakers / moderator are relationships to presenter CPT
+const speakerIds = Array.isArray(acf.speakers) ? acf.speakers : [];
 
-    // Support: number ID, string ID, or Post Object
-    const moderatorId =
-        typeof moderatorRaw === "number"
-        ? moderatorRaw
-        : typeof moderatorRaw === "string"
-        ? parseInt(moderatorRaw, 10) || null
-        : moderatorRaw && typeof moderatorRaw === "object"
-        ? (moderatorRaw.ID || moderatorRaw.id || null)
-        : null;
+// ACF relationship returns an array (even if max = 1)
+const moderatorArr = Array.isArray(acf.moderator)
+  ? acf.moderator
+  : acf.moderator
+  ? [acf.moderator]
+  : [];
 
+const moderatorRaw = moderatorArr[0] ?? null;
 
-    // Description field can be either session-description or event_description
-    const descriptionHtml =
-      acf["session-description"] ||
-      acf.session_description ||
-      acf.event_description ||
-      acf["event-description"] ||
-      item.content?.rendered ||
-      "";
-
-    return {
-      id: item.id,
-      title: decodeHtmlEntities(item.title?.rendered || ""),
-      date: dateLabel,
-      startTime: acf["event-time-start"] || null,
-      endTime: acf["event-time-end"] || null,
-      room: roomName,
-      track: trackName,
-      speakerIds,
-      moderatorId,
-      contentHtml: descriptionHtml,
-      sortKey,
-      dayKey,
-      kinds, // e.g. ['session'], ['social'], or both
-    };
-  });
-}
+// Support: number ID, string ID, or Post Object
+const moderatorId =
+  typeof moderatorRaw === "number"
+    ? moderatorRaw
+    : typeof moderatorRaw === "string"
+    ? parseInt(moderatorRaw, 10) || null
+    : moderatorRaw && typeof moderatorRaw === "object"
+    ? (moderatorRaw.ID || moderatorRaw.id || null)
+    : null;
 
 // Public: fetch schedule and split into sessions / socials / all (deduped)
 export async function fetchScheduleData() {
