@@ -5,7 +5,7 @@ import Welcome from "./pages/Welcome";
 import Schedule from "./pages/Schedule";
 import Presenters from "./pages/Presenters";
 
-import "./App.css";
+import "./index.css";
 
 /**
  * Tiny, dependency-free router.
