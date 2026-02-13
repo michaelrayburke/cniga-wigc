@@ -1,6 +1,5 @@
 // src/pages/Schedule.jsx
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { fetchScheduleData } from "../api/wp";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
@@ -94,10 +93,14 @@ function getPersonName(p) {
   return "";
 }
   
+
+function getPeopleList(value) {
+  return normalizeToArray(value).map(getPersonName).filter(Boolean).join(", ");
+}
+
 function getPersonId(p) {
   if (!p) return null;
   if (typeof p === "object") {
-    // common shapes we might see from WP / ACF / custom API
     const id =
       p.id ??
       p.ID ??
@@ -118,15 +121,19 @@ function getPeopleObjects(value) {
 
 function PeopleLinks({ people }) {
   if (!people?.length) return null;
+
   return (
     <>
       {people.map((p, idx) => (
         <span key={`${p.id || p.name}-${idx}`}>
           {idx > 0 && <span className="schedule-person-sep">, </span>}
           {p.id ? (
-            <Link className="schedule-person-link" to={`/presenters?presenterId=${encodeURIComponent(p.id)}`}>
+            <a
+              className="schedule-person-link"
+              href={`/presenters?presenterId=${encodeURIComponent(p.id)}`}
+            >
               {p.name}
-            </Link>
+            </a>
           ) : (
             <span>{p.name}</span>
           )}
@@ -135,10 +142,7 @@ function PeopleLinks({ people }) {
     </>
   );
 }
-  
-function getPeopleList(value) {
-  return normalizeToArray(value).map(getPersonName).filter(Boolean).join(", ");
-}
+
 
   // Track dropdown options (from sessions) — MUST be above early returns
  const allTracks = useMemo(() => {
@@ -433,7 +437,8 @@ const filtered = timeFilteredBase.filter((e) => {
                 const starred = starredIds.includes(id);
                 const displayTrack = getDisplayTrack(e);
                 const speakers = getPeopleObjects(e.speakers);
-                const moderators = getPeopleObjects(e.moderator)
+                const moderators = getPeopleObjects(e.moderator);
+                const hasPeople = speakers.length > 0 || moderators.length > 0
 
                 return (
                   <article key={id} className="schedule-card">
@@ -504,14 +509,15 @@ const filtered = timeFilteredBase.filter((e) => {
   <div className="schedule-people">
     {moderators.length > 0 && (
       <p className="schedule-person">
-       <span className="schedule-person-label">Speakers:</span>{" "}
-        <PeopleLinks people={speakers} />        <PeopleLinks people={moderators} />
+        <span className="schedule-person-label">Moderator:</span>{" "}
+        <PeopleLinks people={moderators} />
       </p>
     )}
 
     {speakers.length > 0 && (
       <p className="schedule-person">
-        <span className="schedule-person-label">Speakers:</span> {speakerNames}
+        <span className="schedule-person-label">Speakers:</span>{" "}
+        <PeopleLinks people={speakers} />
       </p>
     )}
   </div>

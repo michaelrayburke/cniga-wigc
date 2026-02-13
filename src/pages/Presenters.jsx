@@ -1,6 +1,5 @@
 // src/pages/Presenters.jsx
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { fetchScheduleData, fetchPresentersList } from "../api/wp";
 import "./Presenters.css";
 
@@ -28,7 +27,6 @@ export default function Presenters() {
   const [presenters, setPresenters] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [error, setError] = useState("");
-  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState(null);
 
@@ -41,10 +39,11 @@ export default function Presenters() {
         ]);
         setSessions(sessions);
         setPresenters(presenters);
-       if (presenters.length) {
-          const paramId = searchParams.get("presenterId");
+        if (presenters.length) {
+          const params = new URLSearchParams(window.location.search);
+          const paramId = params.get("presenterId");
           const match = paramId
-            ? presenters.find((p) => String(p.id) === String(paramId))
+            ? presenters.find((x) => String(x.id) === String(paramId))
             : null;
           setSelectedId(match ? match.id : presenters[0].id);
         }
@@ -57,14 +56,6 @@ export default function Presenters() {
     })();
   }, []);
 
-// If someone changes the URL param while already on the page
-  useEffect(() => {
-    const paramId = searchParams.get("presenterId");
-    if (!paramId || !presenters.length) return;
-    const match = presenters.find((p) => String(p.id) === String(paramId));
-    if (match) setSelectedId(match.id);
-  }, [searchParams, presenters]);
-  
   const searchTerm = search.trim().toLowerCase();
 
   const filteredPresenters = useMemo(() => {
@@ -154,10 +145,9 @@ export default function Presenters() {
               }
               onClick={() => {
                 setSelectedId(p.id);
-                setSearchParams((prev) => {
-                  prev.set("presenterId", String(p.id));
-                  return prev;
-                });
+                const url = new URL(window.location.href);
+                url.searchParams.set("presenterId", String(p.id));
+                window.history.replaceState({}, "", url.toString());
               }}
             >
               {p.photo && (
