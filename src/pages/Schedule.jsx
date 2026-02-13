@@ -1,5 +1,6 @@
 // src/pages/Schedule.jsx
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { fetchScheduleData } from "../api/wp";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
@@ -93,7 +94,48 @@ function getPersonName(p) {
   return "";
 }
   
+function getPersonId(p) {
+  if (!p) return null;
+  if (typeof p === "object") {
+    // common shapes we might see from WP / ACF / custom API
+    const id =
+      p.id ??
+      p.ID ??
+      p.post_id ??
+      p.postId ??
+      p.presenterId ??
+      null;
+    return id != null ? String(id) : null;
+  }
+  return null;
+}
 
+function getPeopleObjects(value) {
+  return normalizeToArray(value)
+    .map((p) => ({ id: getPersonId(p), name: getPersonName(p) }))
+    .filter((x) => x.name);
+}
+
+function PeopleLinks({ people }) {
+  if (!people?.length) return null;
+  return (
+    <>
+      {people.map((p, idx) => (
+        <span key={`${p.id || p.name}-${idx}`}>
+          {idx > 0 && <span className="schedule-person-sep">, </span>}
+          {p.id ? (
+            <Link className="schedule-person-link" to={`/presenters?presenterId=${encodeURIComponent(p.id)}`}>
+              {p.name}
+            </Link>
+          ) : (
+            <span>{p.name}</span>
+          )}
+        </span>
+      ))}
+    </>
+  );
+}
+  
 function getPeopleList(value) {
   return normalizeToArray(value).map(getPersonName).filter(Boolean).join(", ");
 }
@@ -390,8 +432,8 @@ const filtered = timeFilteredBase.filter((e) => {
                 const id = String(e.id);
                 const starred = starredIds.includes(id);
                 const displayTrack = getDisplayTrack(e);
-                const speakerNames = getPeopleList(e.speakers);
-                const moderatorName = getPeopleList(e.moderator); // works if moderator is single or array
+                const speakers = getPeopleObjects(e.speakers);
+                const moderators = getPeopleObjects(e.moderator)
 
                 return (
                   <article key={id} className="schedule-card">
@@ -458,15 +500,16 @@ const filtered = timeFilteredBase.filter((e) => {
                       dangerouslySetInnerHTML={{ __html: e.contentHtml }}
                     />
                   )}
-{(speakerNames || moderatorName) && (
+{hasPeople && (
   <div className="schedule-people">
-    {moderatorName && (
+    {moderators.length > 0 && (
       <p className="schedule-person">
-        <span className="schedule-person-label">Moderator:</span> {moderatorName}
+       <span className="schedule-person-label">Speakers:</span>{" "}
+        <PeopleLinks people={speakers} />        <PeopleLinks people={moderators} />
       </p>
     )}
 
-    {speakerNames && (
+    {speakers.length > 0 && (
       <p className="schedule-person">
         <span className="schedule-person-label">Speakers:</span> {speakerNames}
       </p>
