@@ -1,40 +1,117 @@
 // src/App.jsx
-import { useState } from "react";
-import LoginScreen from "./components/LoginScreen";
-import Layout from "./components/Layout";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import Welcome from "./pages/Welcome";
 import Schedule from "./pages/Schedule";
 import Presenters from "./pages/Presenters";
-import Profile from "./pages/Profile";
-import "./index.css";
 
-import { useAuth } from "./context/AuthContext";
+import "./App.css";
+
+/**
+ * Tiny, dependency-free router.
+ * Why: deep links like /presenters?presenterId=123 should load the Presenters screen
+ * on first page load/refresh (Netlify + future mobile deep linking).
+ *
+ * Pages:
+ *   /               -> welcome
+ *   /schedule       -> schedule
+ *   /presenters     -> presenters (supports ?presenterId=####)
+ */
+function parseRouteFromLocation() {
+  if (typeof window === "undefined") return { page: "welcome" };
+
+  const rawPath = window.location.pathname || "/";
+  const path = rawPath.replace(/\/+$/, "") || "/";
+
+  // Support legacy query param routing, if you ever used it before (optional)
+  const params = new URLSearchParams(window.location.search);
+  const legacyPage = params.get("page");
+
+  let page = "welcome";
+  if (path === "/schedule" || legacyPage === "schedule") page = "schedule";
+  if (path === "/presenters" || legacyPage === "presenters") page = "presenters";
+
+  return {
+    page,
+    presenterId: params.get("presenterId") || null,
+  };
+}
+
+function buildUrl({ page, presenterId }) {
+  let path = "/";
+  if (page === "schedule") path = "/schedule";
+  if (page === "presenters") path = "/presenters";
+
+  const params = new URLSearchParams();
+  if (page === "presenters" && presenterId) params.set("presenterId", String(presenterId));
+
+  const qs = params.toString();
+  return qs ? `${path}?${qs}` : path;
+}
 
 export default function App() {
-  const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState("welcome");
+  const [route, setRoute] = useState(() => parseRouteFromLocation());
 
-  // While Supabase is checking for an existing session
-  if (loading) {
-    return (
-      <div className="app-loading">
-        <p>Loading WIGC app…</p>
-      </div>
-    );
-  }
+  // Keep app state in sync with the browser URL (back/forward + manual edits)
+  useEffect(() => {
+    const onPopState = () => setRoute(parseRouteFromLocation());
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
-  // Not logged in → show login screen
-  if (!user) {
-    return <LoginScreen />; // no more localStorage / onLogin needed
-  }
+  const navigate = useCallback((next) => {
+    const nextRoute = { ...route, ...next };
+    const url = buildUrl(nextRoute);
 
-  // Logged in → show main app shell with tabs
+    // Update URL without full reload
+    window.history.pushState({}, "", url);
+    setRoute(nextRoute);
+  }, [route]);
+
+  // If you land on /presenters?presenterId=###, Presenters.jsx already auto-selects.
+  // This ensures if presenterId changes via URL (e.g. copied link), we re-render.
+  const pageEl = useMemo(() => {
+    if (route.page === "schedule") return <Schedule />;
+    if (route.page === "presenters") return <Presenters key={`presenters:${route.presenterId || "none"}`} />;
+    return <Welcome />;
+  }, [route.page, route.presenterId]);
+
   return (
-    <Layout activeTab={activeTab} onTabChange={setActiveTab}>
-      {activeTab === "welcome" && <Welcome />}
-      {activeTab === "schedule" && <Schedule />}
-      {activeTab === "presenters" && <Presenters />}
-      {activeTab === "profile" && <Profile />}
-    </Layout>
+    <div className="app-root">
+      <header className="top-bar">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true">WIGC</span>
+        </div>
+        <div className="top-title">{route.page === "schedule" ? "SCHEDULE" : route.page === "presenters" ? "PRESENTERS" : "WELCOME"}</div>
+        <div className="top-actions" />
+      </header>
+
+      <main className="app-main">{pageEl}</main>
+
+      {/* Bottom nav: uses navigate() so URL always matches and deep links work */}
+      <nav className="bottom-nav" aria-label="Primary">
+        <button
+          type="button"
+          className={`nav-btn ${route.page === "welcome" ? "active" : ""}`}
+          onClick={() => navigate({ page: "welcome", presenterId: null })}
+        >
+          WELCOME
+        </button>
+        <button
+          type="button"
+          className={`nav-btn ${route.page === "schedule" ? "active" : ""}`}
+          onClick={() => navigate({ page: "schedule", presenterId: null })}
+        >
+          SCHEDULE
+        </button>
+        <button
+          type="button"
+          className={`nav-btn ${route.page === "presenters" ? "active" : ""}`}
+          onClick={() => navigate({ page: "presenters" })}
+        >
+          PRESENTERS
+        </button>
+      </nav>
+    </div>
   );
 }
