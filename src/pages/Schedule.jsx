@@ -1,6 +1,6 @@
 // src/pages/Schedule.jsx
 import { useEffect, useMemo, useState } from "react";
-import { fetchScheduleData } from "../api/wp";
+import { fetchScheduleData, fetchSponsorGroups } from "../api/wp";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import "./Schedule.css";
@@ -13,6 +13,11 @@ export default function Schedule() {
   const [socials, setSocials] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
   const [error, setError] = useState("");
+
+  // Sponsors (logos)
+  const [sponsorGroups, setSponsorGroups] = useState([]);
+  const [sponsorsError, setSponsorsError] = useState("");
+
 
   // views: all | mine | sessions | socials
   const [view, setView] = useState("all");
@@ -49,7 +54,21 @@ export default function Schedule() {
       }
     })();
   }, []);
-  function getDisplayTrack(e) {
+  
+
+  // 2) Load sponsors (same source as Welcome screen)
+  useEffect(() => {
+    (async () => {
+      try {
+        const groups = await fetchSponsorGroups();
+        setSponsorGroups(Array.isArray(groups) ? groups : []);
+      } catch (err) {
+        console.error(err);
+        setSponsorsError("Unable to load sponsors.");
+      }
+    })();
+  }, []);
+function getDisplayTrack(e) {
   // Hide for socials (wigc-event-type = social)
   if (e?.kinds?.includes("social") || e?.kinds?.includes("socials")) return "";
 
@@ -141,6 +160,50 @@ function PeopleLinks({ people }) {
       ))}
     </>
   );
+
+
+function SponsorStrip({ groups }) {
+  const sponsors = useMemo(() => {
+    const g = Array.isArray(groups) ? groups : [];
+    return g.flatMap((grp) => Array.isArray(grp?.sponsors) ? grp.sponsors : []);
+  }, [groups]);
+
+  if (!sponsors.length) return null;
+
+  return (
+    <div className="schedule-sponsors">
+      <div className="schedule-sponsors-label">Sponsors</div>
+      <div className="schedule-sponsor-strip">
+        {sponsors.map((s) => {
+          const key = `${s.type || "s"}-${s.id || s.name}`;
+          const href = s.website || "#";
+          const isLink = Boolean(s.website);
+          return (
+            <a
+              key={key}
+              className="schedule-sponsor-card"
+              href={href}
+              target={isLink ? "_blank" : undefined}
+              rel={isLink ? "noreferrer" : undefined}
+              aria-label={isLink ? `${s.name} website` : s.name}
+            >
+              {s.logoUrl ? (
+                <img
+                  src={s.logoUrl}
+                  alt={s.name}
+                  className="schedule-sponsor-logo"
+                  loading="lazy"
+                />
+              ) : (
+                <span className="schedule-sponsor-name">{s.name}</span>
+              )}
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 }
 
 
@@ -375,6 +438,12 @@ const filtered = timeFilteredBase.filter((e) => {
           showPast={showPast}
           setShowPast={setShowPast}
         />
+
+        {/* Sponsor logos (shared feed with Welcome screen) */}
+        {!sponsorsError && sponsorGroups.length > 0 && (
+          <SponsorStrip groups={sponsorGroups} />
+        )}
+
         {favoritesLoading ? (
           <p className="app-status-text">Loading your schedule…</p>
         ) : (
