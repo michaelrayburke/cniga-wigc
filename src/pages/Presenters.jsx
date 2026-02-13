@@ -1,5 +1,6 @@
 // src/pages/Presenters.jsx
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { fetchScheduleData, fetchPresentersList } from "../api/wp";
 import "./Presenters.css";
 
@@ -27,6 +28,7 @@ export default function Presenters() {
   const [presenters, setPresenters] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [error, setError] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState(null);
 
@@ -39,8 +41,12 @@ export default function Presenters() {
         ]);
         setSessions(sessions);
         setPresenters(presenters);
-        if (presenters.length) {
-          setSelectedId(presenters[0].id);
+       if (presenters.length) {
+          const paramId = searchParams.get("presenterId");
+          const match = paramId
+            ? presenters.find((p) => String(p.id) === String(paramId))
+            : null;
+          setSelectedId(match ? match.id : presenters[0].id);
         }
       } catch (err) {
         console.error(err);
@@ -51,6 +57,14 @@ export default function Presenters() {
     })();
   }, []);
 
+// If someone changes the URL param while already on the page
+  useEffect(() => {
+    const paramId = searchParams.get("presenterId");
+    if (!paramId || !presenters.length) return;
+    const match = presenters.find((p) => String(p.id) === String(paramId));
+    if (match) setSelectedId(match.id);
+  }, [searchParams, presenters]);
+  
   const searchTerm = search.trim().toLowerCase();
 
   const filteredPresenters = useMemo(() => {
@@ -138,7 +152,13 @@ export default function Presenters() {
                 "presenter-list-item" +
                 (p.id === selectedId ? " presenter-list-item-active" : "")
               }
-              onClick={() => setSelectedId(p.id)}
+              onClick={() => {
+                setSelectedId(p.id);
+                setSearchParams((prev) => {
+                  prev.set("presenterId", String(p.id));
+                  return prev;
+                });
+              }}
             >
               {p.photo && (
                 <img
