@@ -118,6 +118,7 @@
 .schedule-title {
   font-size: 0.95rem;
   font-weight: 700;
+  color: var(--cniga-burnt-red);
   margin: 0;
 }
 
@@ -150,7 +151,7 @@
 /* Description body */
 .schedule-body {
   margin-top: 4px;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   line-height: 1.4;
   color: #111827;
 }
@@ -164,6 +165,22 @@
   margin: 6px 0 0 0;
 }
 
+
+/* People Links */
+schedule-person-link {
+  color: var(--cniga-burnt-red);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.schedule-person-link:hover,
+.schedule-person-link:focus {
+  text-decoration: underline;
+}
+
+.schedule-person-sep {
+  color: #374151;
+}
 
 /* Status / error text (shared) */
 .app-status-text {
