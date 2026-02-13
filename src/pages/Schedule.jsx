@@ -1,6 +1,6 @@
 // src/pages/Schedule.jsx
 import { useEffect, useMemo, useState } from "react";
-import { fetchScheduleData } from "../api/wp";
+import { fetchScheduleData, fetchSponsorGroups } from "../api/wp";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import "./Schedule.css";
@@ -13,6 +13,11 @@ export default function Schedule() {
   const [socials, setSocials] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
   const [error, setError] = useState("");
+
+  // Sponsors (logos/links)
+  const [sponsorGroups, setSponsorGroups] = useState([]);
+  const [sponsorsError, setSponsorsError] = useState("");
+
 
   // views: all | mine | sessions | socials
   const [view, setView] = useState("all");
@@ -49,6 +54,20 @@ export default function Schedule() {
       }
     })();
   }, []);
+
+  // 2) Load sponsors from WP (for logo strip)
+  useEffect(() => {
+    (async () => {
+      try {
+        const groups = await fetchSponsorGroups();
+        setSponsorGroups(Array.isArray(groups) ? groups : []);
+      } catch (e) {
+        console.error(e);
+        setSponsorsError("Unable to load sponsors.");
+      }
+    })();
+  }, []);
+
   function getDisplayTrack(e) {
   // Hide for socials (wigc-event-type = social)
   if (e?.kinds?.includes("social") || e?.kinds?.includes("socials")) return "";
@@ -98,16 +117,11 @@ function getPeopleList(value) {
   return normalizeToArray(value).map(getPersonName).filter(Boolean).join(", ");
 }
 
+
 function getPersonId(p) {
   if (!p) return null;
   if (typeof p === "object") {
-    const id =
-      p.id ??
-      p.ID ??
-      p.post_id ??
-      p.postId ??
-      p.presenterId ??
-      null;
+    const id = p.id ?? p.ID ?? p.post_id ?? p.postId ?? p.presenterId ?? null;
     return id != null ? String(id) : null;
   }
   return null;
@@ -121,7 +135,6 @@ function getPeopleObjects(value) {
 
 function PeopleLinks({ people }) {
   if (!people?.length) return null;
-
   return (
     <>
       {people.map((p, idx) => (
@@ -142,7 +155,6 @@ function PeopleLinks({ people }) {
     </>
   );
 }
-
 
   // Track dropdown options (from sessions) — MUST be above early returns
  const allTracks = useMemo(() => {
@@ -375,6 +387,37 @@ const filtered = timeFilteredBase.filter((e) => {
           showPast={showPast}
           setShowPast={setShowPast}
         />
+
+      {/* Sponsors */}
+      {flatSponsors.length > 0 && (
+        <div className="schedule-sponsors-strip" aria-label="Sponsors">
+          {flatSponsors.map((s) => (
+            <a
+              key={`${s.type || "s"}-${s.id || s.name}`}
+              className="schedule-sponsor-chip"
+              href={s.website || "#"}
+              target={s.website ? "_blank" : undefined}
+              rel="noreferrer"
+              title={s.name}
+            >
+              {s.logoUrl ? (
+                <img
+                  src={s.logoUrl}
+                  alt={s.name}
+                  className="schedule-sponsor-logo"
+                  loading="lazy"
+                />
+              ) : (
+                <span className="schedule-sponsor-name">{s.name}</span>
+              )}
+            </a>
+          ))}
+        </div>
+      )}
+      {sponsorsError && (
+        <p className="app-status-text app-status-error">{sponsorsError}</p>
+      )}
+
         {favoritesLoading ? (
           <p className="app-status-text">Loading your schedule…</p>
         ) : (
@@ -437,8 +480,8 @@ const filtered = timeFilteredBase.filter((e) => {
                 const starred = starredIds.includes(id);
                 const displayTrack = getDisplayTrack(e);
                 const speakers = getPeopleObjects(e.speakers);
-                const moderators = getPeopleObjects(e.moderator);
-                const hasPeople = speakers.length > 0 || moderators.length > 0
+                const moderators = getPeopleObjects(e.moderator); // works if moderator is single or array
+                const hasPeople = speakers.length > 0 || moderators.length > 0;
 
                 return (
                   <article key={id} className="schedule-card">
@@ -509,15 +552,13 @@ const filtered = timeFilteredBase.filter((e) => {
   <div className="schedule-people">
     {moderators.length > 0 && (
       <p className="schedule-person">
-        <span className="schedule-person-label">Moderator:</span>{" "}
-        <PeopleLinks people={moderators} />
+        <span className="schedule-person-label">Moderator:</span> <PeopleLinks people={moderators} />
       </p>
     )}
 
     {speakers.length > 0 && (
       <p className="schedule-person">
-        <span className="schedule-person-label">Speakers:</span>{" "}
-        <PeopleLinks people={speakers} />
+        <span className="schedule-person-label">Speakers:</span> <PeopleLinks people={speakers} />
       </p>
     )}
   </div>
