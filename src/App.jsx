@@ -1,117 +1,83 @@
 // src/App.jsx
-import { useCallback, useEffect, useMemo, useState } from "react";
-
+import { useCallback, useEffect, useState } from "react";
+import LoginScreen from "./components/LoginScreen";
+import Layout from "./components/Layout";
 import Welcome from "./pages/Welcome";
 import Schedule from "./pages/Schedule";
 import Presenters from "./pages/Presenters";
-
+import Profile from "./pages/Profile";
 import "./index.css";
 
-/**
- * Tiny, dependency-free router.
- * Why: deep links like /presenters?presenterId=123 should load the Presenters screen
- * on first page load/refresh (Netlify + future mobile deep linking).
- *
- * Pages:
- *   /               -> welcome
- *   /schedule       -> schedule
- *   /presenters     -> presenters (supports ?presenterId=####)
- */
-function parseRouteFromLocation() {
-  if (typeof window === "undefined") return { page: "welcome" };
+import { useAuth } from "./context/AuthContext";
 
-  const rawPath = window.location.pathname || "/";
-  const path = rawPath.replace(/\/+$/, "") || "/";
+// Map URL paths to tabs
+function tabFromPath(pathname) {
+  const path = (pathname || "/").replace(/\/+$/, "") || "/";
 
-  // Support legacy query param routing, if you ever used it before (optional)
-  const params = new URLSearchParams(window.location.search);
-  const legacyPage = params.get("page");
-
-  let page = "welcome";
-  if (path === "/schedule" || legacyPage === "schedule") page = "schedule";
-  if (path === "/presenters" || legacyPage === "presenters") page = "presenters";
-
-  return {
-    page,
-    presenterId: params.get("presenterId") || null,
-  };
+  if (path === "/presenters") return "presenters";
+  if (path === "/schedule") return "schedule";
+  if (path === "/profile") return "profile";
+  // default (/, /welcome, anything unknown)
+  return "welcome";
 }
 
-function buildUrl({ page, presenterId }) {
-  let path = "/";
-  if (page === "schedule") path = "/schedule";
-  if (page === "presenters") path = "/presenters";
-
-  const params = new URLSearchParams();
-  if (page === "presenters" && presenterId) params.set("presenterId", String(presenterId));
-
-  const qs = params.toString();
-  return qs ? `${path}?${qs}` : path;
+// Map tabs back to URL paths
+function pathFromTab(tab) {
+  if (tab === "presenters") return "/presenters";
+  if (tab === "schedule") return "/schedule";
+  if (tab === "profile") return "/profile";
+  return "/";
 }
 
 export default function App() {
-  const [route, setRoute] = useState(() => parseRouteFromLocation());
+  const { user, loading } = useAuth();
 
-  // Keep app state in sync with the browser URL (back/forward + manual edits)
+  // ✅ Initialize the tab from the current URL so deep links work on refresh.
+  const [activeTab, setActiveTab] = useState(() => tabFromPath(window.location.pathname));
+
+  // ✅ Keep the tab in sync with browser back/forward.
   useEffect(() => {
-    const onPopState = () => setRoute(parseRouteFromLocation());
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
+    const onPop = () => setActiveTab(tabFromPath(window.location.pathname));
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  const navigate = useCallback((next) => {
-    const nextRoute = { ...route, ...next };
-    const url = buildUrl(nextRoute);
+  // ✅ Use a single tab-change handler that also updates the URL (SPA-style).
+  const handleTabChange = useCallback((nextTab) => {
+    setActiveTab(nextTab);
 
-    // Update URL without full reload
-    window.history.pushState({}, "", url);
-    setRoute(nextRoute);
-  }, [route]);
+    const nextPath = pathFromTab(nextTab);
 
-  // If you land on /presenters?presenterId=###, Presenters.jsx already auto-selects.
-  // This ensures if presenterId changes via URL (e.g. copied link), we re-render.
-  const pageEl = useMemo(() => {
-    if (route.page === "schedule") return <Schedule />;
-    if (route.page === "presenters") return <Presenters key={`presenters:${route.presenterId || "none"}`} />;
-    return <Welcome />;
-  }, [route.page, route.presenterId]);
+    // Preserve query params ONLY when staying on presenters (so presenterId survives)
+    const keepSearch = nextTab === "presenters" ? window.location.search : "";
+    const nextUrl = `${nextPath}${keepSearch}`;
 
+    if (window.location.pathname + window.location.search !== nextUrl) {
+      window.history.pushState({}, "", nextUrl);
+    }
+  }, []);
+
+  // While Supabase is checking for an existing session
+  if (loading) {
+    return (
+      <div className="app-loading">
+        <p>Loading WIGC app…</p>
+      </div>
+    );
+  }
+
+  // Not logged in → show login screen
+  if (!user) {
+    return <LoginScreen />; // no more localStorage / onLogin needed
+  }
+
+  // Logged in → show main app shell with tabs
   return (
-    <div className="app-root">
-      <header className="top-bar">
-        <div className="brand">
-          <span className="brand-mark" aria-hidden="true">WIGC</span>
-        </div>
-        <div className="top-title">{route.page === "schedule" ? "SCHEDULE" : route.page === "presenters" ? "PRESENTERS" : "WELCOME"}</div>
-        <div className="top-actions" />
-      </header>
-
-      <main className="app-main">{pageEl}</main>
-
-      {/* Bottom nav: uses navigate() so URL always matches and deep links work */}
-      <nav className="bottom-nav" aria-label="Primary">
-        <button
-          type="button"
-          className={`nav-btn ${route.page === "welcome" ? "active" : ""}`}
-          onClick={() => navigate({ page: "welcome", presenterId: null })}
-        >
-          WELCOME
-        </button>
-        <button
-          type="button"
-          className={`nav-btn ${route.page === "schedule" ? "active" : ""}`}
-          onClick={() => navigate({ page: "schedule", presenterId: null })}
-        >
-          SCHEDULE
-        </button>
-        <button
-          type="button"
-          className={`nav-btn ${route.page === "presenters" ? "active" : ""}`}
-          onClick={() => navigate({ page: "presenters" })}
-        >
-          PRESENTERS
-        </button>
-      </nav>
-    </div>
+    <Layout activeTab={activeTab} onTabChange={handleTabChange}>
+      {activeTab === "welcome" && <Welcome />}
+      {activeTab === "schedule" && <Schedule />}
+      {activeTab === "presenters" && <Presenters />}
+      {activeTab === "profile" && <Profile />}
+    </Layout>
   );
 }
